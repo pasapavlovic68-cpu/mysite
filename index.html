@@ -332,6 +332,83 @@
             white-space: nowrap;
         }
         
+        /* Date Group Cards */
+        .date-group-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            margin-bottom: 10px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .date-group-card:active {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(0.98);
+        }
+        
+        .date-group-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .date-group-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(96, 165, 250, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        .date-group-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .date-group-date {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .date-group-count {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        
+        .date-group-amounts {
+            display: flex;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .date-group-income {
+            color: var(--accent-income);
+        }
+        
+        .date-group-expense {
+            color: var(--accent-expense);
+        }
+        
         /* Action Buttons Grid */
         /* Action Buttons Inline */
         .action-buttons-inline {
@@ -820,6 +897,17 @@
         </div>
     </div>
 
+    <!-- Date Details Modal -->
+    <div class="modal" id="dateDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="dateDetailsTitle">Транзакции за день</h2>
+                <button class="close-modal" onclick="closeModal('dateDetailsModal')">✕</button>
+            </div>
+            <div id="dateDetailsContent"></div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
@@ -1114,9 +1202,56 @@
                 return;
             }
 
-            const sorted = [...appData.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+            // Group transactions by date
+            const grouped = {};
+            appData.transactions.forEach(t => {
+                const dateKey = t.date; // YYYY-MM-DD format
+                if (!grouped[dateKey]) {
+                    grouped[dateKey] = [];
+                }
+                grouped[dateKey].push(t);
+            });
+
+            // Sort dates descending
+            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
             
-            container.innerHTML = sorted.map(t => {
+            container.innerHTML = sortedDates.map(dateKey => {
+                const transactions = grouped[dateKey];
+                const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                const count = transactions.length;
+                
+                const date = new Date(dateKey);
+                const dateText = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+                
+                return `
+                    <div class="date-group-card" onclick="openDateDetails('${dateKey}')">
+                        <div class="date-group-left">
+                            <div class="date-group-icon">📅</div>
+                            <div class="date-group-info">
+                                <div class="date-group-date">${dateText}</div>
+                                <div class="date-group-count">${count} ${count === 1 ? 'операция' : count < 5 ? 'операции' : 'операций'}</div>
+                            </div>
+                        </div>
+                        <div class="date-group-amounts">
+                            ${totalExpense > 0 ? `<span class="date-group-expense">-${formatCurrency(totalExpense)}</span>` : ''}
+                            ${totalIncome > 0 ? `<span class="date-group-income">+${formatCurrency(totalIncome)}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openDateDetails(dateKey) {
+            const transactions = appData.transactions.filter(t => t.date === dateKey);
+            const date = new Date(dateKey);
+            const dateText = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            document.getElementById('dateDetailsTitle').textContent = dateText;
+            
+            const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const content = sorted.map(t => {
                 const category = appData.categories.find(c => c.id === t.category);
                 const sign = t.type === 'income' ? '+' : '-';
                 
@@ -1127,18 +1262,20 @@
                         </div>
                         <div class="transaction-details">
                             <div class="transaction-category">${category ? category.name : 'Неизвестно'}</div>
-                            <div class="transaction-date">${formatDate(t.date)}</div>
                         </div>
                         <div class="transaction-amount ${t.type}">
                             ${sign}${formatCurrency(t.amount)}
                         </div>
                         <div class="action-buttons">
-                            <button class="action-btn" onclick="editTransaction('${t.id}')">✏️</button>
-                            <button class="action-btn delete" onclick="deleteTransaction('${t.id}')">🗑️</button>
+                            <button class="action-btn" onclick="editTransaction('${t.id}'); closeModal('dateDetailsModal');">✏️</button>
+                            <button class="action-btn delete" onclick="deleteTransaction('${t.id}'); closeModal('dateDetailsModal');">🗑️</button>
                         </div>
                     </div>
                 `;
             }).join('');
+            
+            document.getElementById('dateDetailsContent').innerHTML = content;
+            openModal('dateDetailsModal');
         }
 
         function calculateStats() {
