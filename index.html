@@ -735,6 +735,102 @@
             background: rgba(96, 165, 250, 0.2);
             transform: scale(0.98);
         }
+        
+        /* Category Dropdown */
+        .category-select {
+            width: 100%;
+            padding: 14px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+        
+        .category-select:active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .category-dropdown {
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-top: 8px;
+            padding: 8px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .category-dropdown.show {
+            display: block;
+        }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            margin-bottom: 6px;
+            background: var(--glass-bg);
+            gap: 0;
+            overflow: hidden;
+        }
+        
+        .category-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+            padding: 14px 12px;
+            cursor: pointer;
+        }
+        
+        .category-item-left:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .category-item-emoji {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        
+        .category-item-name {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .category-delete-btn {
+            padding: 14px 16px;
+            background: rgba(248, 113, 113, 0.2);
+            border: none;
+            border-left: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 0;
+            color: var(--accent-expense);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .category-delete-btn:active {
+            background: rgba(248, 113, 113, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -850,9 +946,15 @@
 
                 <div class="form-group">
                     <label class="form-label">Категория</label>
-                    <select class="form-select" id="category" required>
-                        <option value="">Выберите</option>
-                    </select>
+                    <div class="category-select" id="categorySelect" onclick="toggleCategoryDropdown()">
+                        <span id="selectedCategoryText">Выберите</span>
+                        <span style="margin-left: auto;">▼</span>
+                    </div>
+                    <input type="hidden" id="category" required>
+                    
+                    <div class="category-dropdown" id="categoryDropdown">
+                        <div id="categoryList"></div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1060,6 +1162,11 @@
             document.getElementById('transactionId').value = '';
             document.getElementById('transactionType').value = type;
             
+            // Reset category selection
+            document.getElementById('category').value = '';
+            document.getElementById('selectedCategoryText').textContent = 'Выберите';
+            document.getElementById('categoryDropdown').classList.remove('show');
+            
             const now = new Date();
             document.getElementById('date').value = now.toISOString().slice(0, 10);
             
@@ -1110,17 +1217,55 @@
         }
 
         function updateCategoryOptions() {
-            const select = document.getElementById('category');
-            select.innerHTML = '<option value="">Выберите</option>';
+            const categoryList = document.getElementById('categoryList');
             
-            appData.categories
-                .filter(cat => cat.type === appData.currentType)
-                .forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat.id;
-                    option.textContent = `${cat.emoji} ${cat.name}`;
-                    select.appendChild(option);
-                });
+            const categories = appData.categories.filter(cat => cat.type === appData.currentType);
+            
+            if (categories.length === 0) {
+                categoryList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Нет категорий</div>';
+                return;
+            }
+            
+            categoryList.innerHTML = categories.map(cat => {
+                return `
+                    <div class="category-item">
+                        <div class="category-item-left" onclick="selectCategory('${cat.id}', '${cat.emoji} ${cat.name}', event)">
+                            <span class="category-item-emoji">${cat.emoji}</span>
+                            <span class="category-item-name">${cat.name}</span>
+                        </div>
+                        <button class="category-delete-btn" onclick="deleteCategoryFromList('${cat.id}', event)" type="button">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleCategoryDropdown() {
+            const dropdown = document.getElementById('categoryDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function selectCategory(categoryId, categoryText, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            document.getElementById('category').value = categoryId;
+            document.getElementById('selectedCategoryText').textContent = categoryText;
+            document.getElementById('categoryDropdown').classList.remove('show');
+        }
+
+        function deleteCategoryFromList(categoryId, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            if (!confirm('Удалить эту категорию?')) return;
+            
+            appData.categories = appData.categories.filter(c => c.id !== categoryId);
+            saveData();
+            updateCategoryOptions();
         }
 
         function saveTransaction(e) {
@@ -1160,7 +1305,13 @@
             document.getElementById('date').value = transaction.date;
             
             updateCategoryOptions();
-            document.getElementById('category').value = transaction.category;
+            
+            // Set selected category
+            const category = appData.categories.find(c => c.id === transaction.category);
+            if (category) {
+                document.getElementById('category').value = transaction.category;
+                document.getElementById('selectedCategoryText').textContent = `${category.emoji} ${category.name}`;
+            }
             
             openModal('addTransactionModal');
         }
@@ -1394,27 +1545,50 @@
         function renderCategoriesList() {
             const container = document.getElementById('categoriesList');
             
-            const userCategories = appData.categories.filter(cat => 
-                !['salary', 'food', 'transport', 'entertainment', 'shopping', 'health', 'bills', 'other'].includes(cat.id)
-            );
-
-            if (userCategories.length === 0) {
-                container.innerHTML = '<div style="color: var(--text-muted); padding: 12px; font-size: 0.9rem;">Нет пользовательских категорий</div>';
+            // Group categories by type
+            const incomeCategories = appData.categories.filter(cat => cat.type === 'income');
+            const expenseCategories = appData.categories.filter(cat => cat.type === 'expense');
+            
+            if (appData.categories.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-muted); padding: 12px; font-size: 0.9rem;">Нет категорий</div>';
                 return;
             }
 
-            container.innerHTML = userCategories.map(cat => `
-                <div class="transaction-item" style="margin-bottom: 8px;">
-                    <div class="transaction-icon ${cat.type}">
-                        ${cat.emoji}
+            let html = '';
+            
+            if (incomeCategories.length > 0) {
+                html += '<div style="margin-bottom: 16px;"><div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Доходы</div>';
+                html += incomeCategories.map(cat => `
+                    <div class="transaction-item" style="margin-bottom: 8px;">
+                        <div class="transaction-icon income">
+                            ${cat.emoji}
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-category">${cat.name}</div>
+                        </div>
+                        <button class="action-btn delete" onclick="deleteCategory('${cat.id}')">🗑️</button>
                     </div>
-                    <div class="transaction-details">
-                        <div class="transaction-category">${cat.name}</div>
-                        <div class="transaction-date">${cat.type === 'income' ? 'Доход' : 'Расход'}</div>
+                `).join('');
+                html += '</div>';
+            }
+            
+            if (expenseCategories.length > 0) {
+                html += '<div><div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Расходы</div>';
+                html += expenseCategories.map(cat => `
+                    <div class="transaction-item" style="margin-bottom: 8px;">
+                        <div class="transaction-icon expense">
+                            ${cat.emoji}
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-category">${cat.name}</div>
+                        </div>
+                        <button class="action-btn delete" onclick="deleteCategory('${cat.id}')">🗑️</button>
                     </div>
-                    <button class="action-btn delete" onclick="deleteCategory('${cat.id}')">🗑️</button>
-                </div>
-            `).join('');
+                `).join('');
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
         }
 
         function deleteCategory(id) {
