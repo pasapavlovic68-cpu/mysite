@@ -1,7 +1,3 @@
-
-Finance tracker · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -41,7 +37,7 @@ nav button.active{color:var(--accent)}
 nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 
 /* FAB */
-.fab{position:fixed;bottom:74px;right:calc(50% - 200px);z-index:101;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 24px rgba(245,166,35,.4);transition:.2s;display:flex;align-items:center;justify-content:center}
+.fab{position:fixed;bottom:74px;right:max(16px, calc(50% - 199px));z-index:101;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 24px rgba(245,166,35,.4);transition:.2s;display:flex;align-items:center;justify-content:center}
 .fab:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(245,166,35,.5)}
 .fab:active{transform:scale(.95)}
 
@@ -162,6 +158,9 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .color-picker{display:flex;gap:8px;flex-wrap:wrap}
 .color-opt{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s}
 .color-opt.selected{border-color:var(--text)}
+
+.emoji-wrap{position:relative;display:inline-flex}
+.emoji-del-x{position:absolute;top:-6px;right:-6px;width:16px;height:16px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;cursor:pointer;font-weight:700;line-height:1;z-index:5;border:1.5px solid var(--bg)}
 
 .week-day-picker{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .wd-btn{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:.15s;text-align:center}
@@ -364,8 +363,11 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
       <div class="color-picker" id="color-picker"></div>
     </div>
     <div class="form-group">
-      <label class="form-label">Иконка</label>
-      <div class="cats-picker" id="icon-picker" style="gap:6px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label class="form-label" style="margin-bottom:0">Иконка</label>
+        <button id="icon-edit-toggle" onclick="toggleIconEditMode()" style="background:none;border:none;color:var(--text3);font-size:11px;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;letter-spacing:.5px;padding:4px 8px;border-radius:6px;transition:.15s">Изменить</button>
+      </div>
+      <div class="cats-picker" id="icon-picker" style="gap:6px;position:relative"></div>
     </div>
     <button class="btn btn-primary" onclick="saveCategory()">Добавить</button>
   </div>
@@ -797,9 +799,34 @@ function openAddCatModal(){
   document.getElementById('color-picker').innerHTML = COLORS.map((c,i)=>`
     <div class="color-opt ${i===0?'selected':''}" style="background:${c}" onclick="selectColor('${c}',this)"></div>`).join('');
   // icon picker
-  document.getElementById('icon-picker').innerHTML = ICONS.map((ic,i)=>`
-    <div class="cat-pick ${i===0?'selected':''}" onclick="selectIcon('${ic}',this)" style="font-size:18px;padding:6px 10px">${ic}</div>`).join('');
+  iconEditMode = false;
+  renderIconPicker();
   openModal('overlay-cat');
+}
+function renderIconPicker(){
+  const picker = document.getElementById('icon-picker');
+  picker.innerHTML = ICONS.map((ic,i)=>`
+    <div class="emoji-wrap">
+      <div class="cat-pick ${ic===selectedIcon?'selected':''}" onclick="selectIcon('${ic}',this)" style="font-size:18px;padding:6px 10px">${ic}</div>
+      ${iconEditMode?`<span class="emoji-del-x" onclick="removeIconFromList('${ic}')">×</span>`:''}
+    </div>`).join('')
+    + `<div id="emoji-add-btn" class="cat-pick" onclick="addCustomEmoji()" style="font-size:18px;padding:6px 10px;color:var(--text3);border-style:dashed">+</div>`;
+}
+let iconEditMode = false;
+function toggleIconEditMode(){
+  iconEditMode = !iconEditMode;
+  const btn = document.getElementById('icon-edit-toggle');
+  btn.textContent = iconEditMode ? 'Готово' : 'Изменить';
+  btn.style.color = iconEditMode ? 'var(--accent)' : 'var(--text3)';
+  const row = document.getElementById('custom-emoji-row');
+  if(row) row.remove();
+  renderIconPicker();
+}
+function removeIconFromList(ic){
+  const idx = ICONS.indexOf(ic);
+  if(idx>-1) ICONS.splice(idx,1);
+  if(selectedIcon===ic) selectedIcon = ICONS[0]||'';
+  renderIconPicker();
 }
 function selectColor(c,el){
   selectedColor=c;
@@ -810,6 +837,31 @@ function selectIcon(ic,el){
   selectedIcon=ic;
   document.querySelectorAll('#icon-picker .cat-pick').forEach(e=>e.classList.remove('selected'));
   el.classList.add('selected');
+}
+function addCustomEmoji(){
+  // show inline input row below picker
+  let existing = document.getElementById('custom-emoji-row');
+  if(existing){ existing.querySelector('input').focus(); return; }
+  const row = document.createElement('div');
+  row.id = 'custom-emoji-row';
+  row.style = 'display:flex;gap:8px;margin-top:8px;align-items:center';
+  row.innerHTML = `
+    <input id="custom-emoji-input" type="text" maxlength="4"
+      placeholder="🎉" class="form-input"
+      style="width:80px;text-align:center;font-size:22px;padding:8px"/>
+    <button onclick="confirmCustomEmoji()" class="btn btn-primary" style="flex:1;padding:10px;font-size:13px">Добавить</button>`;
+  document.getElementById('icon-picker').after(row);
+  row.querySelector('input').focus();
+}
+function confirmCustomEmoji(){
+  const val = document.getElementById('custom-emoji-input').value.trim();
+  if(!val) return;
+  const ic = [...val][0];
+  if(!ICONS.includes(ic)) ICONS.push(ic);
+  selectedIcon = ic;
+  const row = document.getElementById('custom-emoji-row');
+  if(row) row.remove();
+  renderIconPicker();
 }
 function saveCategory(){
   const name = document.getElementById('cat-name-input').value.trim();
