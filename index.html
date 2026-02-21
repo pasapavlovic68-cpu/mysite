@@ -1,1626 +1,852 @@
+
+Finance tracker · HTML
+Copy
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="theme-color" content="#0a0e1a">
-    <title>Budget Tracker Mobile</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #151b2d;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.4);
-            --accent-income: #4ade80;
-            --accent-expense: #f87171;
-            --accent-blue: #60a5fa;
-            --shadow-glow: 0 0 40px rgba(96, 165, 250, 0.15);
-        }
-        
-        body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 50%, #0f1729 100%);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        /* Background orbs */
-        body::before,
-        body::after {
-            content: '';
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.2;
-            animation: float 20s ease-in-out infinite;
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        body::before {
-            width: 250px;
-            height: 250px;
-            background: var(--accent-blue);
-            top: -50px;
-            right: -50px;
-        }
-        
-        body::after {
-            width: 200px;
-            height: 200px;
-            background: var(--accent-income);
-            bottom: 100px;
-            left: -50px;
-            animation-delay: 10s;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(20px, -30px) scale(1.1); }
-            66% { transform: translate(-15px, 20px) scale(0.9); }
-        }
-        
-        .container {
-            max-width: 100%;
-            padding: 20px 16px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Glass Card */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: var(--shadow-glow);
-            margin-bottom: 16px;
-        }
-        
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-top: 8px;
-        }
-        
-        .header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .settings-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        
-        /* Balance Card */
-        .balance-card {
-            background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.02) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 16px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .balance-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-income));
-        }
-        
-        .balance-label {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .balance-amount {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .balance-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
-        .balance-item {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--glass-border);
-        }
-        
-        .balance-item-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            white-space: nowrap;
-        }
-        
-        .balance-item-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .income { color: var(--accent-income); }
-        .expense { color: var(--accent-expense); }
-        
-        /* Quick Stats */
-        .quick-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .stat-box {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 14px;
-        }
-        
-        .stat-box-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-        
-        .stat-box-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        /* Tabs */
-        .tabs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 16px;
-            background: var(--glass-bg);
-            padding: 6px;
-            border-radius: 14px;
-            border: 1px solid var(--glass-border);
-        }
-        
-        .tab {
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            background: transparent;
-            color: var(--text-secondary);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .tab.active {
-            background: linear-gradient(135deg, var(--accent-blue) 0%, #3b82f6 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Transaction List */
-        .transaction-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            position: relative;
-        }
-        
-        .transaction-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            margin-right: 10px;
-            flex-shrink: 0;
-        }
-        
-        .transaction-icon.income {
-            background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(74, 222, 128, 0.1));
-            color: var(--accent-income);
-        }
-        
-        .transaction-icon.expense {
-            background: linear-gradient(135deg, rgba(248, 113, 113, 0.2), rgba(248, 113, 113, 0.1));
-            color: var(--accent-expense);
-        }
-        
-        .transaction-details {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-        }
-        
-        .transaction-category {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .transaction-date {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-        
-        .transaction-amount {
-            font-size: 1rem;
-            font-weight: 700;
-            flex-shrink: 0;
-            margin-left: 8px;
-            white-space: nowrap;
-        }
-        
-        /* Date Group Cards */
-        .date-group-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px;
-            margin-bottom: 10px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .date-group-card:active {
-            background: rgba(255, 255, 255, 0.08);
-            transform: scale(0.98);
-        }
-        
-        .date-group-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .date-group-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: rgba(96, 165, 250, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        
-        .date-group-info {
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-        
-        .date-group-date {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .date-group-count {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-        
-        .date-group-amounts {
-            display: flex;
-            gap: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        
-        .date-group-income {
-            color: var(--accent-income);
-        }
-        
-        .date-group-expense {
-            color: var(--accent-expense);
-        }
-        
-        /* Action Buttons Grid */
-        /* Action Buttons Inline */
-        .action-buttons-inline {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        
-        .action-btn-inline {
-            padding: 12px;
-            border: none;
-            border-radius: 14px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .income-btn {
-            background: linear-gradient(135deg, var(--accent-income), #22c55e);
-            color: white;
-        }
-        
-        .expense-btn {
-            background: linear-gradient(135deg, var(--accent-expense), #ef4444);
-            color: white;
-        }
-        
-        .action-btn-inline:active {
-            transform: scale(0.98);
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px 24px 0 0;
-            padding: 20px 16px 24px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            animation: slideUp 0.3s ease;
-            touch-action: pan-y;
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-        
-        .close-modal {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-secondary);
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        
-        /* Form */
-        .form-group {
-            margin-bottom: 14px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-        
-        .form-input,
-        .form-select {
-            width: 100%;
-            padding: 14px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-        }
-        
-        .form-input:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            background: rgba(255, 255, 255, 0.08);
-        }
-        
-        .type-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-        
-        .type-option {
-            padding: 14px;
-            border: 2px solid var(--glass-border);
-            border-radius: 12px;
-            background: var(--glass-bg);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        
-        .type-option.active.income {
-            border-color: var(--accent-income);
-            background: rgba(74, 222, 128, 0.1);
-            color: var(--accent-income);
-        }
-        
-        .type-option.active.expense {
-            border-color: var(--accent-expense);
-            background: rgba(248, 113, 113, 0.1);
-            color: var(--accent-expense);
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 14px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-blue) 0%, #3b82f6 100%);
-            color: white;
-            box-shadow: 0 8px 24px rgba(96, 165, 250, 0.3);
-        }
-        
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-        
-        .btn-secondary {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            margin-top: 12px;
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
-        
-        .empty-icon {
-            font-size: 3.5rem;
-            margin-bottom: 12px;
-            opacity: 0.5;
-        }
-        
-        .empty-text {
-            font-size: 1rem;
-        }
-        
-        /* Category Pills */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .category-pill {
-            padding: 12px;
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            background: var(--glass-bg);
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.85rem;
-        }
-        
-        .category-pill.active {
-            border-color: var(--accent-blue);
-            background: rgba(96, 165, 250, 0.15);
-            color: var(--accent-blue);
-        }
-        
-        /* Settings */
-        .settings-section {
-            margin-bottom: 24px;
-        }
-        
-        .settings-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--accent-blue);
-        }
-        
-        /* Week Budget Alert */
-        .week-budget-alert {
-            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(74, 222, 128, 0.05));
-            border: 1px solid rgba(74, 222, 128, 0.2);
-            border-radius: 14px;
-            padding: 12px;
-            margin-bottom: 14px;
-            display: none;
-        }
-        
-        .week-budget-alert.show {
-            display: block;
-        }
-        
-        .week-budget-alert h4 {
-            margin-bottom: 6px;
-            color: var(--accent-income);
-            font-size: 0.95rem;
-        }
-        
-        .week-budget-input {
-            margin-top: 8px;
-        }
-        
-        /* Action buttons */
-        .action-buttons {
-            display: flex;
-            gap: 6px;
-            margin-left: auto;
-        }
-        
-        .action-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        
-        .action-btn.delete {
-            color: var(--accent-expense);
-        }
-        
-        /* Amount Suggestions */
-        .amount-suggestions {
-            display: none;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-        
-        .amount-suggestions.show {
-            display: grid;
-        }
-        
-        .suggestion-btn {
-            padding: 10px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            color: var(--accent-blue);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .suggestion-btn:active {
-            background: rgba(96, 165, 250, 0.2);
-            transform: scale(0.98);
-        }
-        
-        /* Category Dropdown */
-        .category-select {
-            width: 100%;
-            padding: 14px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            user-select: none;
-        }
-        
-        .category-select:active {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        
-        .category-dropdown {
-            display: none;
-            max-height: 300px;
-            overflow-y: auto;
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            margin-top: 8px;
-            padding: 8px;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .category-dropdown.show {
-            display: block;
-        }
-        
-        .category-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            margin-bottom: 6px;
-            background: var(--glass-bg);
-            gap: 0;
-            overflow: hidden;
-        }
-        
-        .category-item-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-            min-width: 0;
-            padding: 14px 12px;
-            cursor: pointer;
-        }
-        
-        .category-item-left:active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .category-item-emoji {
-            font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-        
-        .category-item-name {
-            font-size: 1rem;
-            font-weight: 500;
-        }
-        
-        .category-delete-btn {
-            padding: 14px 16px;
-            background: rgba(248, 113, 113, 0.2);
-            border: none;
-            border-left: 1px solid rgba(248, 113, 113, 0.3);
-            border-radius: 0;
-            color: var(--accent-expense);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .category-delete-btn:active {
-            background: rgba(248, 113, 113, 0.4);
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Budget · VND</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;
+  --surface:#161921;
+  --surface2:#1e2330;
+  --surface3:#252c3d;
+  --border:#2a3347;
+  --accent:#f5a623;
+  --accent2:#e8845a;
+  --green:#4ecca3;
+  --red:#ff6b7a;
+  --text:#eef0f6;
+  --text2:#8892a4;
+  --text3:#505a70;
+  --radius:16px;
+  --radius-sm:10px;
+}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-200px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* LAYOUT */
+#app{display:flex;flex-direction:column;min-height:100dvh;position:relative;z-index:1}
+.page{flex:1;overflow-y:auto;padding:0 0 90px;display:none}
+.page.active{display:block}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(22,25,33,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;padding:8px 0 env(safe-area-inset-bottom,8px)}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--text3);font-family:'Sora',sans-serif;font-size:10px;font-weight:500;cursor:pointer;padding:6px 0;transition:.2s;letter-spacing:.3px}
+nav button svg{width:22px;height:22px;transition:.2s}
+nav button.active{color:var(--accent)}
+nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
+
+/* FAB */
+.fab{position:fixed;bottom:74px;right:calc(50% - 200px);z-index:101;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 24px rgba(245,166,35,.4);transition:.2s;display:flex;align-items:center;justify-content:center}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(245,166,35,.5)}
+.fab:active{transform:scale(.95)}
+
+/* HEADER */
+.page-header{padding:52px 20px 20px;position:sticky;top:0;background:var(--bg);z-index:10}
+.page-header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.page-header p{color:var(--text2);font-size:13px;margin-top:2px}
+
+/* HOME */
+.home-hero{margin:16px 20px 0;background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:24px;padding:28px 24px;position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:150px;height:150px;background:radial-gradient(circle,rgba(245,166,35,.12),transparent 70%)}
+.hero-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.hero-amount{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:500;letter-spacing:-1px;margin:6px 0;line-height:1}
+.hero-amount.positive{color:var(--green)}
+.hero-amount.negative{color:var(--red)}
+.hero-sub{display:flex;gap:20px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.hero-sub-item{flex:1}
+.hero-sub-item .lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+.hero-sub-item .val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:3px}
+.hero-sub-item .val.pos{color:var(--green)}
+.hero-sub-item .val.neg{color:var(--red)}
+
+.section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:24px 20px 10px}
+.quick-cats{display:flex;gap:10px;padding:0 20px;overflow-x:auto;scrollbar-width:none}
+.quick-cats::-webkit-scrollbar{display:none}
+.quick-cat{flex:0 0 auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.15s;font-size:13px;font-weight:500}
+.quick-cat:hover{border-color:var(--accent);background:var(--surface2)}
+.quick-cat .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+.recent-ops{padding:0 20px;display:flex;flex-direction:column;gap:8px}
+.op-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
+.op-card:hover{border-color:var(--border);background:var(--surface2)}
+.op-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.op-info{flex:1;min-width:0}
+.op-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.op-amount{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;flex-shrink:0}
+.op-amount.expense{color:var(--red)}
+.op-amount.income{color:var(--green)}
+
+/* HISTORY */
+.history-group{padding:0 20px;margin-bottom:4px}
+.history-date{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:20px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.history-date .date-total{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500}
+
+/* REPORTS */
+.report-section{padding:0 20px;margin-bottom:20px}
+.report-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.report-bar-title{font-size:12px;color:var(--text2);margin-bottom:16px;font-weight:500}
+.bar-item{margin-bottom:12px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.bar-label .cat-name{font-weight:500}
+.bar-label .cat-val{font-family:'JetBrains Mono',monospace;color:var(--text2)}
+.bar-track{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+
+.report-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px}
+.summary-card .s-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.summary-card .s-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;margin-top:6px}
+.summary-card .s-val.red{color:var(--red)}
+.summary-card .s-val.green{color:var(--green)}
+
+/* SETTINGS */
+.settings-section{padding:0 20px;margin-bottom:24px}
+.settings-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;gap:12px}
+.settings-row:last-child{border-bottom:none}
+.settings-row:hover{background:var(--surface2)}
+.settings-row .row-label{font-size:14px;font-weight:500}
+.settings-row .row-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.settings-row .row-val{font-size:13px;color:var(--accent);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+
+.cats-list{display:flex;flex-direction:column;gap:8px}
+.cat-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.cat-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.cat-name-text{flex:1;font-size:14px;font-weight:500}
+.cat-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:6px;transition:.15s;display:flex}
+.cat-del:hover{color:var(--red);background:rgba(255,107,122,.1)}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:.25s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;padding:24px 20px calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateY(100%);transition:.3s cubic-bezier(.32,1,.35,1);max-height:90dvh;overflow-y:auto}
+.overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:20px;letter-spacing:-.2px}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;color:var(--text);font-family:'Sora',sans-serif;font-size:15px;outline:none;transition:.2s}
+.form-input:focus{border-color:var(--accent);background:var(--surface3)}
+.form-input::placeholder{color:var(--text3)}
+.amount-input-wrap{position:relative}
+.amount-input-wrap .currency{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text3);font-weight:600;pointer-events:none}
+.amount-suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.suggestion{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;cursor:pointer;color:var(--text2);transition:.15s}
+.suggestion:hover{border-color:var(--accent);color:var(--accent)}
+
+.type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.type-btn{padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+.type-btn.active.expense{background:rgba(255,107,122,.15);border-color:var(--red);color:var(--red)}
+.type-btn.active.income{background:rgba(78,204,163,.15);border-color:var(--green);color:var(--green)}
+
+.cats-picker{display:flex;flex-wrap:wrap;gap:8px}
+.cat-pick{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:12px;font-weight:500;transition:.15s}
+.cat-pick.selected{border-color:var(--accent);background:rgba(245,166,35,.1);color:var(--accent)}
+.cat-pick .dot{width:8px;height:8px;border-radius:50%}
+
+.btn{width:100%;padding:14px;border-radius:var(--radius-sm);border:none;font-family:'Sora',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;letter-spacing:.2px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(245,166,35,.3)}
+.btn-primary:hover{box-shadow:0 6px 28px rgba(245,166,35,.4)}
+.btn-primary:active{transform:scale(.98)}
+.btn-danger{background:rgba(255,107,122,.15);color:var(--red);border:1px solid rgba(255,107,122,.3)}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);margin-top:8px}
+
+.color-picker{display:flex;gap:8px;flex-wrap:wrap}
+.color-opt{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s}
+.color-opt.selected{border-color:var(--text)}
+
+.week-day-picker{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wd-btn{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:.15s;text-align:center}
+.wd-btn.active{background:rgba(245,166,35,.15);border-color:var(--accent);color:var(--accent)}
+
+.budget-period{display:flex;justify-content:flex-end;gap:6px;padding:0 20px 0}
+.period-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text3);cursor:pointer;transition:.15s;font-family:'Sora',sans-serif}
+.period-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
+
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty svg{width:48px;height:48px;opacity:.3;margin-bottom:12px}
+.empty p{font-size:14px}
+
+.confirm-btns{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>💰 Budget</h1>
-            <button class="settings-btn" onclick="openSettingsModal()">⚙️</button>
-        </div>
-
-        <!-- Balance Card -->
-        <div class="balance-card">
-            <div class="balance-label">Общий баланс</div>
-            <div class="balance-amount" id="totalBalance">0 ₫</div>
-            
-            <div class="balance-grid">
-                <div class="balance-item">
-                    <div class="balance-item-label">Недельный бюджет</div>
-                    <div class="balance-item-value income" id="weekBudget">0 ₫</div>
-                </div>
-                <div class="balance-item">
-                    <div class="balance-item-label">Дневной лимит</div>
-                    <div class="balance-item-value income" id="dailyLimit">0 ₫</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons-inline">
-            <button class="action-btn-inline income-btn" onclick="openAddTransactionModal('income')">
-                ➕ Доход
-            </button>
-            <button class="action-btn-inline expense-btn" onclick="openAddTransactionModal('expense')">
-                ➖ Расход
-            </button>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="quick-stats">
-            <div class="stat-box">
-                <div class="stat-box-label">Потрачено</div>
-                <div class="stat-box-value expense" id="weekSpent">0 ₫</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-box-label">Осталось</div>
-                <div class="stat-box-value income" id="weekRemaining">0 ₫</div>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('history')">История</button>
-            <button class="tab" onclick="switchTab('stats')">Статистика</button>
-        </div>
-
-        <!-- Content -->
-        <div class="glass-card">
-            <!-- History Tab -->
-            <div class="tab-content active" id="historyTab">
-                <div id="transactionsList"></div>
-            </div>
-
-            <!-- Stats Tab -->
-            <div class="tab-content" id="statsTab">
-                <div class="quick-stats">
-                    <div class="stat-box">
-                        <div class="stat-box-label">Доходы (неделя)</div>
-                        <div class="stat-box-value income" id="weekIncome">0 ₫</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-label">Расходы (неделя)</div>
-                        <div class="stat-box-value expense" id="weekExpense">0 ₫</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-label">Доходы (месяц)</div>
-                        <div class="stat-box-value income" id="monthIncome">0 ₫</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-label">Расходы (месяц)</div>
-                        <div class="stat-box-value expense" id="monthExpense">0 ₫</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div id="app">
+  <!-- PAGES -->
+  <div class="page active" id="page-home">
+    <div class="page-header">
+      <h1 id="greeting">Привет 👋</h1>
+      <p id="today-date"></p>
     </div>
-
-    <!-- Add Transaction Modal -->
-    <div class="modal" id="addTransactionModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Новая операция</h2>
-                <button class="close-modal" onclick="closeModal('addTransactionModal')">✕</button>
-            </div>
-
-            <div class="week-budget-alert" id="weekBudgetAlert" style="display: none;">
-                <h4>💰 Бюджет на неделю</h4>
-                <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.85rem;">Укажите сумму для траты</p>
-                <input type="number" class="form-input" id="weekBudgetInput" placeholder="1500000">
-                <button class="btn btn-primary" style="margin-top: 8px;" onclick="setWeekBudget()">
-                    Установить
-                </button>
-            </div>
-
-            <form id="transactionForm" onsubmit="saveTransaction(event)">
-                <input type="hidden" id="transactionId">
-                <input type="hidden" id="transactionType">
-
-                <div class="form-group">
-                    <label class="form-label">Сумма (VND)</label>
-                    <input type="number" class="form-input" id="amount" required placeholder="0" oninput="showAmountSuggestions(this.value)">
-                    <div class="amount-suggestions" id="amountSuggestions"></div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Категория</label>
-                    <div class="category-select" id="categorySelect" onclick="toggleCategoryDropdown()">
-                        <span id="selectedCategoryText">Выберите</span>
-                        <span style="margin-left: auto;">▼</span>
-                    </div>
-                    <input type="hidden" id="category" required>
-                    
-                    <div class="category-dropdown" id="categoryDropdown">
-                        <div id="categoryList"></div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Дата</label>
-                    <input type="date" class="form-input" id="date" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Сохранить
-                </button>
-                
-                <button type="button" class="btn btn-secondary" onclick="openAddCategoryModal()">
-                    ➕ Новая категория
-                </button>
-            </form>
+    <!-- hero -->
+    <div class="home-hero">
+      <div class="hero-label">ОСТАЛОСЬ НА СЕГОДНЯ</div>
+      <div class="hero-amount" id="hero-today">0 ₫</div>
+      <div class="hero-sub">
+        <div class="hero-sub-item">
+          <div class="lbl">НА НЕДЕЛЮ</div>
+          <div class="val" id="hero-week">0 ₫</div>
         </div>
-    </div>
-
-    <!-- Add Category Modal -->
-    <div class="modal" id="addCategoryModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Новая категория</h2>
-                <button class="close-modal" onclick="closeModal('addCategoryModal')">✕</button>
-            </div>
-
-            <form onsubmit="saveCategory(event)">
-                <div class="form-group">
-                    <label class="form-label">Название</label>
-                    <input type="text" class="form-input" id="categoryName" required placeholder="Продукты">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Эмодзи</label>
-                    <input type="text" class="form-input" id="categoryEmoji" required placeholder="🛒" maxlength="2">
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Добавить
-                </button>
-            </form>
+        <div class="hero-sub-item">
+          <div class="lbl">ДНЕВНОЙ ЛИМИТ</div>
+          <div class="val" id="hero-daily">0 ₫</div>
         </div>
+      </div>
     </div>
+    <!-- quick categories -->
+    <div class="section-title">КАТЕГОРИИ</div>
+    <div class="quick-cats" id="quick-cats"></div>
+    <!-- recent -->
+    <div class="section-title">ПОСЛЕДНИЕ ОПЕРАЦИИ</div>
+    <div class="recent-ops" id="recent-ops"></div>
+  </div>
 
-    <!-- Date Details Modal -->
-    <div class="modal" id="dateDetailsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="dateDetailsTitle">Транзакции за день</h2>
-                <button class="close-modal" onclick="closeModal('dateDetailsModal')">✕</button>
-            </div>
-            <div id="dateDetailsContent"></div>
+  <div class="page" id="page-history">
+    <div class="page-header" style="padding-bottom:12px">
+      <h1>История</h1>
+    </div>
+    <div style="padding:0 20px 10px;display:flex;gap:6px;justify-content:flex-end">
+      <button class="period-btn active" data-period="week" onclick="setHistPeriod('week')">Неделя</button>
+      <button class="period-btn" data-period="month" onclick="setHistPeriod('month')">Месяц</button>
+      <button class="period-btn" data-period="all" onclick="setHistPeriod('all')">Всё</button>
+    </div>
+    <div id="history-container" style="padding:0 20px"></div>
+  </div>
+
+  <div class="page" id="page-reports">
+    <div class="page-header" style="padding-bottom:12px">
+      <h1>Отчёты</h1>
+    </div>
+    <div style="padding:0 20px 10px;display:flex;gap:6px;justify-content:flex-end">
+      <button class="period-btn active" data-period="week" onclick="setRepPeriod('week')">Неделя</button>
+      <button class="period-btn" data-period="month" onclick="setRepPeriod('month')">Месяц</button>
+      <button class="period-btn" data-period="all" onclick="setRepPeriod('all')">Всё</button>
+    </div>
+    <div id="reports-container" style="padding:0 20px"></div>
+  </div>
+
+  <div class="page" id="page-settings">
+    <div class="page-header"><h1>Настройки</h1></div>
+    <div class="settings-section">
+      <div class="section-title" style="padding:0 0 10px">БЮДЖЕТ</div>
+      <div class="settings-card">
+        <div class="settings-row" onclick="openBudgetModal()">
+          <div>
+            <div class="row-label">Недельный бюджет</div>
+            <div class="row-sub">Только расходы</div>
+          </div>
+          <div class="row-val" id="setting-budget">0 ₫</div>
         </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Настройки</h2>
-                <button class="close-modal" onclick="closeModal('settingsModal')">✕</button>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-title">🗓️ Начало недели</div>
-                <div class="form-group">
-                    <select class="form-select" id="weekStartDay">
-                        <option value="0">Воскресенье</option>
-                        <option value="1">Понедельник</option>
-                        <option value="2">Вторник</option>
-                        <option value="3">Среда</option>
-                        <option value="4" selected>Четверг</option>
-                        <option value="5">Пятница</option>
-                        <option value="6">Суббота</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-title">💰 Недельный бюджет</div>
-                <div class="form-group">
-                    <input type="number" class="form-input" id="defaultWeekBudget" placeholder="1500000">
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-title">📂 Категории</div>
-                <div id="categoriesList"></div>
-                <button class="btn btn-secondary" onclick="openAddCategoryModal()">
-                    ➕ Новая категория
-                </button>
-            </div>
-
-            <div class="settings-section">
-                <button class="btn btn-primary" style="width: 100%;" onclick="saveSettingsAndClose()">
-                    💾 Сохранить
-                </button>
-            </div>
-
-            <div class="settings-section">
-                <button class="btn" style="background: rgba(248, 113, 113, 0.2); color: var(--accent-expense);" onclick="clearAllData()">
-                    🗑️ Очистить все данные
-                </button>
-            </div>
+        <div class="settings-row" onclick="openWeekdayModal()">
+          <div>
+            <div class="row-label">Начало недели</div>
+            <div class="row-sub">День сброса бюджета</div>
+          </div>
+          <div class="row-val" id="setting-weekday">Чт</div>
         </div>
+      </div>
     </div>
+    <div class="settings-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 10px">
+        <div class="section-title" style="padding:0">КАТЕГОРИИ</div>
+        <button onclick="openAddCatModal()" style="background:var(--accent);border:none;color:#000;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif">+ Добавить</button>
+      </div>
+      <div class="cats-list" id="cats-list"></div>
+    </div>
+  </div>
 
-    <script>
-        // Same data structure and logic as desktop version
-        let appData = {
-            transactions: [],
-            categories: [
-                { id: 'salary', name: 'Зарплата', emoji: '💰', type: 'income' },
-                { id: 'food', name: 'Еда', emoji: '🍔', type: 'expense' },
-                { id: 'transport', name: 'Транспорт', emoji: '🚗', type: 'expense' },
-                { id: 'entertainment', name: 'Развлечения', emoji: '🎮', type: 'expense' },
-                { id: 'shopping', name: 'Покупки', emoji: '🛒', type: 'expense' },
-                { id: 'health', name: 'Здоровье', emoji: '💊', type: 'expense' },
-                { id: 'bills', name: 'Счета', emoji: '📄', type: 'expense' },
-                { id: 'other', name: 'Прочее', emoji: '📦', type: 'expense' }
-            ],
-            settings: {
-                weekStartDay: 4,
-                weekBudgets: {},
-                defaultWeekBudget: 0
-            },
-            currentType: 'income',
-            editingId: null
-        };
+  <!-- NAV -->
+  <nav>
+    <button class="active" onclick="goTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Главная
+    </button>
+    <button onclick="goTo('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      История
+    </button>
+    <button onclick="goTo('reports')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Отчёты
+    </button>
+    <button onclick="goTo('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Настройки
+    </button>
+  </nav>
+  <button class="fab" onclick="openAddOpModal()">+</button>
+</div>
 
-        function loadData() {
-            const saved = localStorage.getItem('budgetTrackerData');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                appData = { ...appData, ...parsed };
-            }
-            updateUI();
-        }
+<!-- MODAL: ADD/EDIT OPERATION -->
+<div class="overlay" id="overlay-op" onclick="closeOverlay('overlay-op',event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="op-modal-title">Новая операция</div>
+    <div class="form-group">
+      <label class="form-label">Тип</label>
+      <div class="type-toggle">
+        <button class="type-btn expense active" id="type-expense" onclick="selectType('expense')">— Расход</button>
+        <button class="type-btn income" id="type-income" onclick="selectType('income')">+ Доход</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Сумма (VND)</label>
+      <div class="amount-input-wrap">
+        <input class="form-input" id="op-amount" type="text" inputmode="numeric" placeholder="0" oninput="onAmountInput(this)"/>
+        <span class="currency">₫</span>
+      </div>
+      <div class="amount-suggestions" id="amount-suggestions"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Категория</label>
+      <div class="cats-picker" id="cats-picker"></div>
+    </div>
+    <div class="form-group" id="op-date-group" style="display:none">
+      <label class="form-label">Дата</label>
+      <input class="form-input" id="op-date" type="date"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Комментарий</label>
+      <input class="form-input" id="op-comment" type="text" placeholder="Необязательно"/>
+    </div>
+    <button class="btn btn-primary" id="op-save-btn" onclick="saveOperation()">Сохранить</button>
+    <button class="btn btn-ghost" id="op-del-btn" onclick="deleteCurrentOp()" style="display:none;margin-top:8px">Удалить операцию</button>
+  </div>
+</div>
 
-        function saveData() {
-            localStorage.setItem('budgetTrackerData', JSON.stringify(appData));
-        }
+<!-- MODAL: BUDGET -->
+<div class="overlay" id="overlay-budget" onclick="closeOverlay('overlay-budget',event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Недельный бюджет</div>
+    <div class="form-group">
+      <label class="form-label">Сумма (VND)</label>
+      <div class="amount-input-wrap">
+        <input class="form-input" id="budget-input" type="text" inputmode="numeric" placeholder="0" oninput="onAmountInput(this)"/>
+        <span class="currency">₫</span>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveBudget()">Сохранить</button>
+  </div>
+</div>
 
-        function getWeekKey(date) {
-            const d = new Date(date);
-            const weekStart = getWeekStart(d);
-            return weekStart.toISOString().split('T')[0];
-        }
+<!-- MODAL: WEEKDAY -->
+<div class="overlay" id="overlay-weekday" onclick="closeOverlay('overlay-weekday',event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Начало недели</div>
+    <div class="form-group">
+      <div class="week-day-picker" id="weekday-picker"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveWeekday()">Сохранить</button>
+  </div>
+</div>
 
-        function getWeekStart(date) {
-            const d = new Date(date);
-            const day = d.getDay();
-            const diff = (day - appData.settings.weekStartDay + 7) % 7;
-            const weekStart = new Date(d);
-            weekStart.setDate(d.getDate() - diff);
-            weekStart.setHours(0, 0, 0, 0);
-            return weekStart;
-        }
+<!-- MODAL: ADD CATEGORY -->
+<div class="overlay" id="overlay-cat" onclick="closeOverlay('overlay-cat',event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Новая категория</div>
+    <div class="form-group">
+      <label class="form-label">Название</label>
+      <input class="form-input" id="cat-name-input" type="text" placeholder="Еда, Транспорт..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Цвет</label>
+      <div class="color-picker" id="color-picker"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Иконка</label>
+      <div class="cats-picker" id="icon-picker" style="gap:6px"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveCategory()">Добавить</button>
+  </div>
+</div>
 
-        function getWeekEnd(weekStart) {
-            const end = new Date(weekStart);
-            end.setDate(weekStart.getDate() + 6);
-            end.setHours(23, 59, 59, 999);
-            return end;
-        }
+<!-- MODAL: CONFIRM DELETE -->
+<div class="overlay" id="overlay-confirm" onclick="closeOverlay('overlay-confirm',event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="confirm-title">Удалить категорию?</div>
+    <p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:20px" id="confirm-text"></p>
+    <div class="confirm-btns">
+      <button class="btn btn-danger" id="confirm-ok-btn">Удалить</button>
+      <button class="btn btn-ghost" onclick="closeModal('overlay-confirm')">Отмена</button>
+    </div>
+  </div>
+</div>
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN').format(Math.abs(amount)) + ' ₫';
-        }
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const COLORS = ['#f5a623','#e8845a','#ff6b7a','#4ecca3','#5b8dee','#a78bfa','#f472b6','#34d399','#fb923c','#818cf8'];
+const ICONS  = ['🍜','🍕','🍺','☕','🚗','🚌','🏠','💊','🛍️','🎬','💡','📱','✈️','🎮','🐶','📚','💪','🎵','🏋️','💰'];
+const DAYS   = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            return date.toLocaleDateString('ru-RU', options);
-        }
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            
-            if (tab === 'history') {
-                document.getElementById('historyTab').classList.add('active');
-                renderTransactions();
-            } else if (tab === 'stats') {
-                document.getElementById('statsTab').classList.add('active');
-                updateStats();
-            }
-        }
+let operations  = load('ops',[]);
+let categories  = load('cats',[
+  {id:'c1',name:'Еда',color:'#f5a623',icon:'🍜'},
+  {id:'c2',name:'Транспорт',color:'#5b8dee',icon:'🚗'},
+  {id:'c3',name:'Развлечения',color:'#a78bfa',icon:'🎬'},
+  {id:'c4',name:'Здоровье',color:'#4ecca3',icon:'💊'},
+]);
+let weeklyBudget = load('budget',0);
+let weekStartDay = load('weekStart',4); // 4 = Thursday
+let histPeriod   = 'week';
+let repPeriod    = 'week';
+let currentPage  = 'home';
 
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
+// edit state
+let editingOpId  = null;
+let selectedType = 'expense';
+let selectedCat  = null;
+let selectedColor = COLORS[0];
+let selectedIcon  = ICONS[0];
+let selectedWeekday = weekStartDay;
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
+// ─── FORMAT ──────────────────────────────────────────────────────────────────
+function fmtVND(n){
+  if(n==null||isNaN(n))return '0';
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+function parseVND(s){
+  return parseInt(s.replace(/[^\d]/g,''))||0;
+}
+function onAmountInput(el){
+  let raw = el.value.replace(/[^\d]/g,'');
+  let num = parseInt(raw)||0;
+  // format
+  el.value = raw ? fmtVND(num) : '';
+  // suggestions
+  if(el.id === 'op-amount') renderSuggestions(num);
+}
+function renderSuggestions(num){
+  const box = document.getElementById('amount-suggestions');
+  if(!num){box.innerHTML='';return}
+  const mults = [10,100,1000,10000];
+  box.innerHTML = mults.map(m=>`<span class="suggestion" onclick="applySuggestion(${num*m})">${fmtVND(num*m)}</span>`).join('');
+}
+function applySuggestion(val){
+  document.getElementById('op-amount').value = fmtVND(val);
+  renderSuggestions(val);
+}
 
-        function openAddTransactionModal(type = 'expense') {
-            appData.editingId = null;
-            appData.currentType = type;
-            document.getElementById('modalTitle').textContent = type === 'income' ? 'Новый доход' : 'Новый расход';
-            document.getElementById('transactionForm').reset();
-            document.getElementById('transactionId').value = '';
-            document.getElementById('transactionType').value = type;
-            
-            // Reset category selection
-            document.getElementById('category').value = '';
-            document.getElementById('selectedCategoryText').textContent = 'Выберите';
-            document.getElementById('categoryDropdown').classList.remove('show');
-            
-            const now = new Date();
-            document.getElementById('date').value = now.toISOString().slice(0, 10);
-            
-            updateCategoryOptions();
-            openModal('addTransactionModal');
-        }
+// ─── DATES ───────────────────────────────────────────────────────────────────
+function dateStr(d=new Date()){
+  return d.toISOString().slice(0,10);
+}
+function getWeekStart(dayNum){
+  const now = new Date();
+  const dow = now.getDay();
+  let diff = (dow - dayNum + 7) % 7;
+  const start = new Date(now);
+  start.setDate(now.getDate() - diff);
+  start.setHours(0,0,0,0);
+  return start;
+}
+function inPeriod(op, period){
+  const d = new Date(op.date + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(period==='week'){
+    const ws = getWeekStart(weekStartDay);
+    return d >= ws && d <= today;
+  }
+  if(period==='month'){
+    const ms = new Date(today.getFullYear(), today.getMonth(), 1);
+    return d >= ms && d <= today;
+  }
+  return true;
+}
 
-        function selectType(type) {
-            appData.currentType = type;
-            document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('active'));
-            document.querySelector(`.type-option.${type}`).classList.add('active');
-            updateCategoryOptions();
-            
-            const alert = document.getElementById('weekBudgetAlert');
-            if (type === 'income') {
-                alert.classList.add('show');
-            } else {
-                alert.classList.remove('show');
-            }
-        }
+// ─── BUDGET CALC ─────────────────────────────────────────────────────────────
+function calcBudget(){
+  const todayStr = dateStr();
+  const spentToday = operations
+    .filter(o=>o.type==='expense' && o.date===todayStr)
+    .reduce((s,o)=>s+o.amount,0);
+  const ws = getWeekStart(weekStartDay);
+  const spentWeek = operations
+    .filter(o=>o.type==='expense' && inPeriod(o,'week'))
+    .reduce((s,o)=>s+o.amount,0);
+  const daily = weeklyBudget / 7;
+  return {
+    daily,
+    remToday: daily - spentToday,
+    remWeek: weeklyBudget - spentWeek,
+    spentToday, spentWeek
+  };
+}
 
-        function showAmountSuggestions(value) {
-            const suggestionsDiv = document.getElementById('amountSuggestions');
-            
-            if (!value || value.length === 0) {
-                suggestionsDiv.classList.remove('show');
-                return;
-            }
-            
-            const digit = value[0];
-            const suggestions = [
-                digit + '0000',      // 50,000
-                digit + '00000',     // 500,000
-                digit + '000000',    // 5,000,000
-                digit + '0000000'    // 50,000,000
-            ];
-            
-            suggestionsDiv.innerHTML = suggestions.map(amount => 
-                `<button type="button" class="suggestion-btn" onclick="selectAmount(${amount})">${formatCurrency(parseFloat(amount))}</button>`
-            ).join('');
-            
-            suggestionsDiv.classList.add('show');
-        }
-        
-        function selectAmount(amount) {
-            document.getElementById('amount').value = amount;
-            document.getElementById('amountSuggestions').classList.remove('show');
-        }
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function goTo(page){
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('nav button').forEach((b,i)=>{
+    b.classList.toggle('active', ['home','history','reports','settings'][i]===page);
+  });
+  if(page==='home') renderHome();
+  if(page==='history') renderHistory();
+  if(page==='reports') renderReports();
+  if(page==='settings') renderSettings();
+}
 
-        function updateCategoryOptions() {
-            const categoryList = document.getElementById('categoryList');
-            
-            const categories = appData.categories.filter(cat => cat.type === appData.currentType);
-            
-            if (categories.length === 0) {
-                categoryList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Нет категорий</div>';
-                return;
-            }
-            
-            categoryList.innerHTML = categories.map(cat => {
-                return `
-                    <div class="category-item">
-                        <div class="category-item-left" onclick="selectCategory('${cat.id}', '${cat.emoji} ${cat.name}', event)">
-                            <span class="category-item-emoji">${cat.emoji}</span>
-                            <span class="category-item-name">${cat.name}</span>
-                        </div>
-                        <button class="category-delete-btn" onclick="deleteCategoryFromList('${cat.id}', event)" type="button">🗑️</button>
-                    </div>
-                `;
-            }).join('');
-        }
+// ─── RENDER HOME ─────────────────────────────────────────────────────────────
+function renderHome(){
+  const h = new Date().getHours();
+  const greet = h<12?'Доброе утро ☀️':h<17?'Добрый день 👋':'Добрый вечер 🌙';
+  document.getElementById('greeting').textContent = greet;
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  
+  const {daily, remToday, remWeek} = calcBudget();
+  const heroEl = document.getElementById('hero-today');
+  heroEl.textContent = fmtVND(Math.abs(remToday)) + ' ₫';
+  heroEl.className = 'hero-amount ' + (remToday>=0?'positive':'negative');
+  if(remToday<0) heroEl.textContent = '−' + heroEl.textContent;
 
-        function toggleCategoryDropdown() {
-            const dropdown = document.getElementById('categoryDropdown');
-            dropdown.classList.toggle('show');
-        }
+  const wEl = document.getElementById('hero-week');
+  wEl.textContent = fmtVND(Math.abs(remWeek)) + ' ₫';
+  wEl.className = 'val ' + (remWeek>=0?'pos':'neg');
+  if(remWeek<0) wEl.textContent = '−' + wEl.textContent;
 
-        function selectCategory(categoryId, categoryText, event) {
-            if (event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-            
-            document.getElementById('category').value = categoryId;
-            document.getElementById('selectedCategoryText').textContent = categoryText;
-            document.getElementById('categoryDropdown').classList.remove('show');
-        }
+  document.getElementById('hero-daily').textContent = fmtVND(daily) + ' ₫';
 
-        function deleteCategoryFromList(categoryId, event) {
-            if (event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-            
-            if (!confirm('Удалить эту категорию?')) return;
-            
-            appData.categories = appData.categories.filter(c => c.id !== categoryId);
-            saveData();
-            updateCategoryOptions();
-        }
+  // quick cats
+  const qc = document.getElementById('quick-cats');
+  qc.innerHTML = categories.map(c=>`
+    <div class="quick-cat" onclick="openAddOpModal(null,'${c.id}')">
+      <span>${c.icon}</span>
+      <span>${c.name}</span>
+    </div>`).join('');
 
-        function saveTransaction(e) {
-            e.preventDefault();
-            
-            const transaction = {
-                id: document.getElementById('transactionId').value || Date.now().toString(),
-                type: document.getElementById('transactionType').value || appData.currentType,
-                amount: parseFloat(document.getElementById('amount').value),
-                category: document.getElementById('category').value,
-                date: document.getElementById('date').value
-            };
+  // recent 5
+  const recent = [...operations].sort((a,b)=>b.id.localeCompare(a.id)).slice(0,5);
+  const ro = document.getElementById('recent-ops');
+  if(!recent.length){
+    ro.innerHTML='<div class="empty"><p>Операций пока нет</p></div>';return;
+  }
+  ro.innerHTML = recent.map(o=>opCardHTML(o)).join('');
+}
 
-            if (appData.editingId) {
-                const index = appData.transactions.findIndex(t => t.id === appData.editingId);
-                appData.transactions[index] = transaction;
-            } else {
-                appData.transactions.push(transaction);
-            }
+function opCardHTML(o){
+  const cat = categories.find(c=>c.id===o.category)||{name:'Без категории',icon:'📁',color:'#666'};
+  const sign = o.type==='expense'?'−':'+';
+  return `<div class="op-card" onclick="openEditOpModal('${o.id}')">
+    <div class="op-icon" style="background:${cat.color}20">${cat.icon}</div>
+    <div class="op-info">
+      <div class="op-name">${cat.name}${o.comment?' · '+o.comment:''}</div>
+      <div class="op-meta">${formatDate(o.date)}</div>
+    </div>
+    <div class="op-amount ${o.type}">${sign}${fmtVND(o.amount)} ₫</div>
+  </div>`;
+}
 
-            saveData();
-            updateUI();
-            closeModal('addTransactionModal');
-        }
+function formatDate(d){
+  const today = dateStr();
+  const yest = dateStr(new Date(Date.now()-86400000));
+  if(d===today) return 'Сегодня';
+  if(d===yest) return 'Вчера';
+  return new Date(d+'T00:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+}
 
-        function editTransaction(id) {
-            const transaction = appData.transactions.find(t => t.id === id);
-            if (!transaction) return;
+// ─── RENDER HISTORY ──────────────────────────────────────────────────────────
+function setHistPeriod(p){
+  histPeriod=p;
+  document.querySelectorAll('#page-history .period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));
+  renderHistory();
+}
+function renderHistory(){
+  const filtered = operations.filter(o=>inPeriod(o,histPeriod));
+  if(!filtered.length){
+    document.getElementById('history-container').innerHTML='<div class="empty"><p>Нет операций за период</p></div>';
+    return;
+  }
+  // group by date
+  const groups = {};
+  filtered.forEach(o=>{
+    if(!groups[o.date]) groups[o.date]=[];
+    groups[o.date].push(o);
+  });
+  const sorted = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+  document.getElementById('history-container').innerHTML = sorted.map(date=>{
+    const ops = groups[date];
+    const total = ops.reduce((s,o)=>s+(o.type==='expense'?-o.amount:o.amount),0);
+    const sign = total>=0?'+':'−';
+    return `<div>
+      <div class="history-date">
+        <span>${formatDate(date)}</span>
+        <span class="date-total" style="color:${total>=0?'var(--green)':'var(--red)'}">${sign}${fmtVND(Math.abs(total))} ₫</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${ops.sort((a,b)=>b.id.localeCompare(a.id)).map(o=>opCardHTML(o)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
 
-            appData.editingId = id;
-            appData.currentType = transaction.type;
-            document.getElementById('modalTitle').textContent = transaction.type === 'income' ? 'Редактировать доход' : 'Редактировать расход';
-            
-            document.getElementById('transactionId').value = transaction.id;
-            document.getElementById('transactionType').value = transaction.type;
-            document.getElementById('amount').value = transaction.amount;
-            document.getElementById('date').value = transaction.date;
-            
-            updateCategoryOptions();
-            
-            // Set selected category
-            const category = appData.categories.find(c => c.id === transaction.category);
-            if (category) {
-                document.getElementById('category').value = transaction.category;
-                document.getElementById('selectedCategoryText').textContent = `${category.emoji} ${category.name}`;
-            }
-            
-            openModal('addTransactionModal');
-        }
+// ─── RENDER REPORTS ──────────────────────────────────────────────────────────
+function setRepPeriod(p){
+  repPeriod=p;
+  document.querySelectorAll('#page-reports .period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));
+  renderReports();
+}
+function renderReports(){
+  const filtered = operations.filter(o=>inPeriod(o,repPeriod));
+  const expenses = filtered.filter(o=>o.type==='expense');
+  const incomes  = filtered.filter(o=>o.type==='income');
+  const totalExp = expenses.reduce((s,o)=>s+o.amount,0);
+  const totalInc = incomes.reduce((s,o)=>s+o.amount,0);
 
-        function deleteTransaction(id) {
-            if (!confirm('Удалить?')) return;
-            
-            appData.transactions = appData.transactions.filter(t => t.id !== id);
-            saveData();
-            updateUI();
-        }
+  // by category
+  const byCat = {};
+  expenses.forEach(o=>{
+    byCat[o.category]=(byCat[o.category]||0)+o.amount;
+  });
+  const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxCat = catsSorted[0]?catsSorted[0][1]:1;
 
-        function setWeekBudget() {
-            const amount = parseFloat(document.getElementById('weekBudgetInput').value);
-            if (!amount || amount <= 0) {
-                alert('Введите сумму');
-                return;
-            }
+  document.getElementById('reports-container').innerHTML = `
+    <div class="report-summary">
+      <div class="summary-card"><div class="s-label">РАСХОДЫ</div><div class="s-val red">${fmtVND(totalExp)} ₫</div></div>
+      <div class="summary-card"><div class="s-label">ДОХОДЫ</div><div class="s-val green">${fmtVND(totalInc)} ₫</div></div>
+    </div>
+    <div class="report-bar">
+      <div class="report-bar-title">Расходы по категориям</div>
+      ${catsSorted.length ? catsSorted.map(([catId,val])=>{
+        const cat = categories.find(c=>c.id===catId)||{name:'Без категории',color:'#666'};
+        const pct = (val/maxCat*100).toFixed(1);
+        return `<div class="bar-item">
+          <div class="bar-label">
+            <span class="cat-name">${cat.icon||''} ${cat.name}</span>
+            <span class="cat-val">${fmtVND(val)} ₫</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cat.color}"></div></div>
+        </div>`;
+      }).join('') : '<p style="color:var(--text3);font-size:13px">Нет расходов за период</p>'}
+    </div>`;
+}
 
-            const weekKey = getWeekKey(new Date());
-            appData.settings.weekBudgets[weekKey] = amount;
-            saveData();
-            updateUI();
-            
-            document.getElementById('weekBudgetInput').value = '';
-            document.getElementById('weekBudgetAlert').classList.remove('show');
-        }
+// ─── RENDER SETTINGS ─────────────────────────────────────────────────────────
+function renderSettings(){
+  document.getElementById('setting-budget').textContent = fmtVND(weeklyBudget) + ' ₫';
+  document.getElementById('setting-weekday').textContent = DAYS[weekStartDay];
+  const cl = document.getElementById('cats-list');
+  cl.innerHTML = categories.map(c=>`
+    <div class="cat-item">
+      <div class="cat-dot" style="background:${c.color}"></div>
+      <span style="font-size:18px">${c.icon}</span>
+      <span class="cat-name-text">${c.name}</span>
+      <button class="cat-del" onclick="confirmDeleteCat('${c.id}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </button>
+    </div>`).join('');
+}
 
-        function renderTransactions() {
-            const container = document.getElementById('transactionsList');
-            
-            if (appData.transactions.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📊</div>
-                        <div class="empty-text">Нет операций</div>
-                    </div>
-                `;
-                return;
-            }
+// ─── MODAL: ADD/EDIT OP ──────────────────────────────────────────────────────
+function openAddOpModal(opId=null, prefillCat=null){
+  editingOpId = opId;
+  selectedType = 'expense';
+  selectedCat = prefillCat;
 
-            // Group transactions by date
-            const grouped = {};
-            appData.transactions.forEach(t => {
-                const dateKey = t.date; // YYYY-MM-DD format
-                if (!grouped[dateKey]) {
-                    grouped[dateKey] = [];
-                }
-                grouped[dateKey].push(t);
-            });
+  if(opId){
+    const op = operations.find(o=>o.id===opId);
+    if(op){
+      selectedType = op.type;
+      selectedCat = op.category;
+      document.getElementById('op-amount').value = fmtVND(op.amount);
+      document.getElementById('op-comment').value = op.comment||'';
+      document.getElementById('op-date').value = op.date;
+      document.getElementById('op-date-group').style.display='block';
+      document.getElementById('op-modal-title').textContent = 'Редактировать';
+      document.getElementById('op-del-btn').style.display='block';
+    }
+  } else {
+    document.getElementById('op-amount').value = '';
+    document.getElementById('op-comment').value = '';
+    document.getElementById('op-date').value = dateStr();
+    document.getElementById('op-date-group').style.display='none';
+    document.getElementById('op-modal-title').textContent = 'Новая операция';
+    document.getElementById('op-del-btn').style.display='none';
+    renderSuggestions(0);
+  }
 
-            // Sort dates descending
-            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
-            
-            container.innerHTML = sortedDates.map(dateKey => {
-                const transactions = grouped[dateKey];
-                const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-                const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-                const count = transactions.length;
-                
-                const date = new Date(dateKey);
-                const dateText = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
-                
-                return `
-                    <div class="date-group-card" onclick="openDateDetails('${dateKey}')">
-                        <div class="date-group-left">
-                            <div class="date-group-icon">📅</div>
-                            <div class="date-group-info">
-                                <div class="date-group-date">${dateText}</div>
-                                <div class="date-group-count">${count} ${count === 1 ? 'операция' : count < 5 ? 'операции' : 'операций'}</div>
-                            </div>
-                        </div>
-                        <div class="date-group-amounts">
-                            ${totalExpense > 0 ? `<span class="date-group-expense">-${formatCurrency(totalExpense)}</span>` : ''}
-                            ${totalIncome > 0 ? `<span class="date-group-income">+${formatCurrency(totalIncome)}</span>` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+  // type buttons
+  updateTypeButtons();
 
-        function openDateDetails(dateKey) {
-            const transactions = appData.transactions.filter(t => t.date === dateKey);
-            const date = new Date(dateKey);
-            const dateText = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-            
-            document.getElementById('dateDetailsTitle').textContent = dateText;
-            
-            const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            const content = sorted.map(t => {
-                const category = appData.categories.find(c => c.id === t.category);
-                const sign = t.type === 'income' ? '+' : '-';
-                
-                return `
-                    <div class="transaction-item">
-                        <div class="transaction-icon ${t.type}">
-                            ${category ? category.emoji : '📦'}
-                        </div>
-                        <div class="transaction-details">
-                            <div class="transaction-category">${category ? category.name : 'Неизвестно'}</div>
-                        </div>
-                        <div class="transaction-amount ${t.type}">
-                            ${sign}${formatCurrency(t.amount)}
-                        </div>
-                        <div class="action-buttons">
-                            <button class="action-btn" onclick="editTransaction('${t.id}'); closeModal('dateDetailsModal');">✏️</button>
-                            <button class="action-btn delete" onclick="deleteTransaction('${t.id}'); closeModal('dateDetailsModal');">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            document.getElementById('dateDetailsContent').innerHTML = content;
-            openModal('dateDetailsModal');
-        }
+  // cats picker
+  const cp = document.getElementById('cats-picker');
+  cp.innerHTML = categories.map(c=>`
+    <div class="cat-pick ${c.id===selectedCat?'selected':''}" onclick="selectCat('${c.id}')">
+      <span class="dot" style="background:${c.color}"></span>${c.icon} ${c.name}
+    </div>`).join('');
 
-        function calculateStats() {
-            const now = new Date();
-            const weekStart = getWeekStart(now);
-            const weekEnd = getWeekEnd(weekStart);
-            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  openModal('overlay-op');
+}
+function openEditOpModal(id){ openAddOpModal(id); }
 
-            const stats = {
-                totalBalance: 0,
-                weekIncome: 0,
-                weekExpense: 0,
-                monthIncome: 0,
-                monthExpense: 0
-            };
+function selectType(t){
+  selectedType=t;
+  updateTypeButtons();
+}
+function updateTypeButtons(){
+  document.getElementById('type-expense').className='type-btn expense'+(selectedType==='expense'?' active':'');
+  document.getElementById('type-income').className='type-btn income'+(selectedType==='income'?' active':'');
+}
+function selectCat(id){
+  selectedCat=id;
+  document.querySelectorAll('#cats-picker .cat-pick').forEach(el=>{
+    el.classList.toggle('selected', el.onclick.toString().includes("'"+id+"'"));
+  });
+  // re-render cleaner way
+  document.querySelectorAll('#cats-picker .cat-pick').forEach(el=>{
+    const elId = el.getAttribute('onclick').match(/'([^']+)'/)[1];
+    el.classList.toggle('selected', elId===id);
+  });
+}
+function saveOperation(){
+  const amountRaw = parseVND(document.getElementById('op-amount').value);
+  if(!amountRaw){ alert('Введите сумму'); return; }
+  if(!selectedCat){ alert('Выберите категорию'); return; }
 
-            appData.transactions.forEach(t => {
-                const tDate = new Date(t.date);
-                const amount = t.amount;
+  if(editingOpId){
+    const idx = operations.findIndex(o=>o.id===editingOpId);
+    if(idx>-1){
+      operations[idx] = {...operations[idx],
+        amount: amountRaw,
+        type: selectedType,
+        category: selectedCat,
+        comment: document.getElementById('op-comment').value.trim(),
+        date: document.getElementById('op-date').value
+      };
+    }
+  } else {
+    operations.push({
+      id: 'op_'+Date.now(),
+      amount: amountRaw,
+      type: selectedType,
+      category: selectedCat,
+      comment: document.getElementById('op-comment').value.trim(),
+      date: dateStr(),
+      createdAt: new Date().toISOString()
+    });
+  }
+  save('ops', operations);
+  closeModal('overlay-op');
+  renderHome();
+  if(currentPage==='history') renderHistory();
+  if(currentPage==='reports') renderReports();
+}
+function deleteCurrentOp(){
+  if(!editingOpId) return;
+  operations = operations.filter(o=>o.id!==editingOpId);
+  save('ops', operations);
+  closeModal('overlay-op');
+  renderHome();
+  if(currentPage==='history') renderHistory();
+  if(currentPage==='reports') renderReports();
+}
 
-                stats.totalBalance += t.type === 'income' ? amount : -amount;
+// ─── MODAL: BUDGET ───────────────────────────────────────────────────────────
+function openBudgetModal(){
+  document.getElementById('budget-input').value = weeklyBudget ? fmtVND(weeklyBudget) : '';
+  openModal('overlay-budget');
+}
+function saveBudget(){
+  weeklyBudget = parseVND(document.getElementById('budget-input').value);
+  save('budget', weeklyBudget);
+  closeModal('overlay-budget');
+  renderSettings();
+  renderHome();
+}
 
-                if (tDate >= weekStart && tDate <= weekEnd) {
-                    if (t.type === 'income') {
-                        stats.weekIncome += amount;
-                    } else {
-                        stats.weekExpense += amount;
-                    }
-                }
+// ─── MODAL: WEEKDAY ──────────────────────────────────────────────────────────
+function openWeekdayModal(){
+  selectedWeekday = weekStartDay;
+  const picker = document.getElementById('weekday-picker');
+  picker.innerHTML = DAYS.map((d,i)=>`
+    <button class="wd-btn ${i===selectedWeekday?'active':''}" onclick="selectWeekday(${i})">${d}</button>`).join('');
+  openModal('overlay-weekday');
+}
+function selectWeekday(i){
+  selectedWeekday=i;
+  document.querySelectorAll('.wd-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+}
+function saveWeekday(){
+  weekStartDay=selectedWeekday;
+  save('weekStart',weekStartDay);
+  closeModal('overlay-weekday');
+  renderSettings();
+  renderHome();
+}
 
-                if (tDate >= monthStart && tDate <= monthEnd) {
-                    if (t.type === 'income') {
-                        stats.monthIncome += amount;
-                    } else {
-                        stats.monthExpense += amount;
-                    }
-                }
-            });
+// ─── MODAL: ADD CAT ──────────────────────────────────────────────────────────
+function openAddCatModal(){
+  selectedColor=COLORS[0]; selectedIcon=ICONS[0];
+  document.getElementById('cat-name-input').value='';
+  // color picker
+  document.getElementById('color-picker').innerHTML = COLORS.map((c,i)=>`
+    <div class="color-opt ${i===0?'selected':''}" style="background:${c}" onclick="selectColor('${c}',this)"></div>`).join('');
+  // icon picker
+  document.getElementById('icon-picker').innerHTML = ICONS.map((ic,i)=>`
+    <div class="cat-pick ${i===0?'selected':''}" onclick="selectIcon('${ic}',this)" style="font-size:18px;padding:6px 10px">${ic}</div>`).join('');
+  openModal('overlay-cat');
+}
+function selectColor(c,el){
+  selectedColor=c;
+  document.querySelectorAll('.color-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectIcon(ic,el){
+  selectedIcon=ic;
+  document.querySelectorAll('#icon-picker .cat-pick').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function saveCategory(){
+  const name = document.getElementById('cat-name-input').value.trim();
+  if(!name){alert('Введите название');return;}
+  categories.push({id:'c_'+Date.now(),name,color:selectedColor,icon:selectedIcon});
+  save('cats',categories);
+  closeModal('overlay-cat');
+  renderSettings();
+  renderHome();
+}
 
-            const weekKey = getWeekKey(now);
-            const weekBudget = appData.settings.weekBudgets[weekKey] || appData.settings.defaultWeekBudget || 0;
-            
-            const daysPassed = Math.floor((now - weekStart) / (1000 * 60 * 60 * 24));
-            const daysRemaining = 7 - daysPassed;
-            
-            let dailyLimit = 0;
-            if (weekBudget > 0 && daysRemaining > 0) {
-                const remaining = weekBudget - stats.weekExpense;
-                dailyLimit = remaining / daysRemaining;
-            }
+// ─── CONFIRM DELETE CAT ──────────────────────────────────────────────────────
+function confirmDeleteCat(catId){
+  const cat = categories.find(c=>c.id===catId);
+  const count = operations.filter(o=>o.category===catId).length;
+  document.getElementById('confirm-title').textContent = `Удалить «${cat.name}»?`;
+  document.getElementById('confirm-text').textContent = `Это удалит категорию и ${count} операци${count===1?'ю':count<5?'и':'й'} навсегда. Восстановить нельзя.`;
+  document.getElementById('confirm-ok-btn').onclick = ()=>{
+    categories = categories.filter(c=>c.id!==catId);
+    operations = operations.filter(o=>o.category!==catId);
+    save('cats',categories); save('ops',operations);
+    closeModal('overlay-confirm');
+    renderSettings();
+    renderHome();
+  };
+  openModal('overlay-confirm');
+}
 
-            stats.weekBudget = weekBudget;
-            stats.dailyLimit = Math.max(0, dailyLimit);
-            stats.weekRemaining = Math.max(0, weekBudget - stats.weekExpense);
+// ─── OVERLAY HELPERS ─────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function closeOverlay(id,e){
+  if(e.target.id===id) closeModal(id);
+}
 
-            return stats;
-        }
-
-        function updateUI() {
-            const stats = calculateStats();
-
-            document.getElementById('totalBalance').textContent = formatCurrency(stats.totalBalance);
-            document.getElementById('weekBudget').textContent = formatCurrency(stats.weekBudget);
-            document.getElementById('dailyLimit').textContent = formatCurrency(stats.dailyLimit);
-            document.getElementById('weekSpent').textContent = formatCurrency(stats.weekExpense);
-            document.getElementById('weekRemaining').textContent = formatCurrency(stats.weekRemaining);
-
-            renderTransactions();
-            updateStats();
-        }
-
-        function updateStats() {
-            const stats = calculateStats();
-            
-            document.getElementById('weekIncome').textContent = formatCurrency(stats.weekIncome);
-            document.getElementById('weekExpense').textContent = formatCurrency(stats.weekExpense);
-            document.getElementById('monthIncome').textContent = formatCurrency(stats.monthIncome);
-            document.getElementById('monthExpense').textContent = formatCurrency(stats.monthExpense);
-        }
-
-        function openAddCategoryModal() {
-            document.getElementById('categoryName').value = '';
-            document.getElementById('categoryEmoji').value = '';
-            openModal('addCategoryModal');
-        }
-
-        function saveCategory(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('categoryName').value.trim();
-            const emoji = document.getElementById('categoryEmoji').value.trim();
-            
-            if (!name || !emoji) return;
-
-            const category = {
-                id: Date.now().toString(),
-                name: name,
-                emoji: emoji,
-                type: appData.currentType
-            };
-
-            appData.categories.push(category);
-            saveData();
-            updateCategoryOptions();
-            closeModal('addCategoryModal');
-        }
-
-        function openSettingsModal() {
-            document.getElementById('weekStartDay').value = appData.settings.weekStartDay;
-            document.getElementById('defaultWeekBudget').value = appData.settings.defaultWeekBudget || '';
-            renderCategoriesList();
-            openModal('settingsModal');
-        }
-
-        function renderCategoriesList() {
-            const container = document.getElementById('categoriesList');
-            
-            // Group categories by type
-            const incomeCategories = appData.categories.filter(cat => cat.type === 'income');
-            const expenseCategories = appData.categories.filter(cat => cat.type === 'expense');
-            
-            if (appData.categories.length === 0) {
-                container.innerHTML = '<div style="color: var(--text-muted); padding: 12px; font-size: 0.9rem;">Нет категорий</div>';
-                return;
-            }
-
-            let html = '';
-            
-            if (incomeCategories.length > 0) {
-                html += '<div style="margin-bottom: 16px;"><div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Доходы</div>';
-                html += incomeCategories.map(cat => `
-                    <div class="transaction-item" style="margin-bottom: 8px;">
-                        <div class="transaction-icon income">
-                            ${cat.emoji}
-                        </div>
-                        <div class="transaction-details">
-                            <div class="transaction-category">${cat.name}</div>
-                        </div>
-                        <button class="action-btn delete" onclick="deleteCategory('${cat.id}')">🗑️</button>
-                    </div>
-                `).join('');
-                html += '</div>';
-            }
-            
-            if (expenseCategories.length > 0) {
-                html += '<div><div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Расходы</div>';
-                html += expenseCategories.map(cat => `
-                    <div class="transaction-item" style="margin-bottom: 8px;">
-                        <div class="transaction-icon expense">
-                            ${cat.emoji}
-                        </div>
-                        <div class="transaction-details">
-                            <div class="transaction-category">${cat.name}</div>
-                        </div>
-                        <button class="action-btn delete" onclick="deleteCategory('${cat.id}')">🗑️</button>
-                    </div>
-                `).join('');
-                html += '</div>';
-            }
-            
-            container.innerHTML = html;
-        }
-
-        function deleteCategory(id) {
-            if (!confirm('Удалить категорию?')) return;
-            
-            appData.categories = appData.categories.filter(c => c.id !== id);
-            saveData();
-            renderCategoriesList();
-            updateUI();
-        }
-
-        function saveSettings() {
-            appData.settings.weekStartDay = parseInt(document.getElementById('weekStartDay').value);
-            appData.settings.defaultWeekBudget = parseFloat(document.getElementById('defaultWeekBudget').value) || 0;
-            saveData();
-            updateUI();
-        }
-
-        function saveSettingsAndClose() {
-            saveSettings();
-            closeModal('settingsModal');
-        }
-
-        function clearAllData() {
-            if (!confirm('Удалить все данные?')) return;
-            
-            localStorage.removeItem('budgetTrackerData');
-            location.reload();
-        }
-
-        loadData();
-        setInterval(saveData, 30000);
-    </script>
+// ─── INIT ────────────────────────────────────────────────────────────────────
+renderHome();
+</script>
 </body>
 </html>
