@@ -444,11 +444,16 @@ function applySuggestion(val){
 }
 
 // ─── DATES ───────────────────────────────────────────────────────────────────
-function dateStr(d=new Date()){
-  return d.toISOString().slice(0,10);
+function getVNNow(){
+  // Vietnam = UTC+7, всегда
+  return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
+}
+function dateStr(d=null){
+  const vn = d || getVNNow();
+  return vn.getFullYear()+'-'+String(vn.getMonth()+1).padStart(2,'0')+'-'+String(vn.getDate()).padStart(2,'0');
 }
 function getWeekStart(dayNum){
-  const now = new Date();
+  const now = getVNNow();
   const dow = now.getDay();
   let diff = (dow - dayNum + 7) % 7;
   const start = new Date(now);
@@ -458,7 +463,7 @@ function getWeekStart(dayNum){
 }
 function inPeriod(op, period){
   const d = new Date(op.date + 'T00:00:00');
-  const today = new Date(); today.setHours(0,0,0,0);
+  const today = getVNNow(); today.setHours(0,0,0,0);
   if(period==='week'){
     const ws = getWeekStart(weekStartDay);
     return d >= ws && d <= today;
@@ -471,20 +476,28 @@ function inPeriod(op, period){
 }
 
 // ─── BUDGET CALC ─────────────────────────────────────────────────────────────
+function daysLeftInWeek(){
+  const now = getVNNow();
+  const dow = now.getDay();
+  // сколько дней до следующего начала недели (включая сегодня)
+  let d = (weekStartDay - dow + 7) % 7;
+  return d === 0 ? 7 : d;
+}
 function calcBudget(){
   const todayStr = dateStr();
   const spentToday = operations
     .filter(o=>o.type==='expense' && o.date===todayStr)
     .reduce((s,o)=>s+o.amount,0);
-  const ws = getWeekStart(weekStartDay);
   const spentWeek = operations
     .filter(o=>o.type==='expense' && inPeriod(o,'week'))
     .reduce((s,o)=>s+o.amount,0);
-  const daily = weeklyBudget / 7;
+  const remWeek = weeklyBudget - spentWeek;
+  const daysLeft = daysLeftInWeek();
+  const daily = daysLeft > 0 ? remWeek / daysLeft : 0;
   return {
     daily,
     remToday: daily - spentToday,
-    remWeek: weeklyBudget - spentWeek,
+    remWeek,
     spentToday, spentWeek
   };
 }
@@ -523,9 +536,12 @@ function renderHome(){
 
   document.getElementById('hero-daily').textContent = fmtVND(daily) + ' ₫';
 
-  // quick cats
+  // quick cats — сортировка по частоте использования
+  const usageCount = {};
+  operations.forEach(o=>{ usageCount[o.category]=(usageCount[o.category]||0)+1; });
+  const sortedCats = [...categories].sort((a,b)=>(usageCount[b.id]||0)-(usageCount[a.id]||0));
   const qc = document.getElementById('quick-cats');
-  qc.innerHTML = categories.map(c=>`
+  qc.innerHTML = sortedCats.map(c=>`
     <div class="quick-cat" onclick="openAddOpModal(null,'${c.id}')">
       <span>${c.icon}</span>
       <span>${c.name}</span>
@@ -899,6 +915,23 @@ function closeOverlay(id,e){
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 renderHome();
+
+// ─── АВТО-ОБНОВЛЕНИЕ В 00:00 ПО ВЬЕТНАМУ ────────────────────────────────────
+function scheduleMidnightRefresh(){
+  const now = getVNNow();
+  const msUntilMidnight = (
+    (24 - now.getHours()) * 3600 -
+    now.getMinutes() * 60 -
+    now.getSeconds()
+  ) * 1000;
+  setTimeout(()=>{
+    renderHome();
+    if(currentPage==='history') renderHistory();
+    if(currentPage==='reports') renderReports();
+    scheduleMidnightRefresh();
+  }, msUntilMidnight);
+}
+scheduleMidnightRefresh();
 </script>
 </body>
 </html>
