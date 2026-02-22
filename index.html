@@ -175,9 +175,70 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .empty p{font-size:14px}
 
 .confirm-btns{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+
+/* COLLAPSIBLE GROUPS */
+.coll-group{margin-bottom:8px}
+.coll-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:.15s;gap:10px}
+.coll-header:hover{background:var(--surface2)}
+.coll-header.open{border-radius:var(--radius-sm) var(--radius-sm) 0 0;border-bottom-color:transparent}
+.coll-period{font-size:13px;font-weight:600;color:var(--text)}
+.coll-stats{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.coll-exp{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red)}
+.coll-inc{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green)}
+.coll-chevron{font-size:16px;color:var(--text3);transition:transform .2s;line-height:1}
+.coll-header.open .coll-chevron{transform:rotate(90deg)}
+.coll-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);overflow:hidden}
+.coll-day{border-top:1px solid var(--border)}
+.coll-day:first-child{border-top:none}
+.coll-day-header{display:flex;align-items:center;gap:8px;padding:10px 16px;cursor:pointer;transition:.15s}
+.coll-day-header:hover{background:var(--surface2)}
+.coll-day-header.open .coll-chevron{transform:rotate(90deg)}
+.coll-day-label{font-size:12px;font-weight:600;color:var(--text2);flex:1}
+.coll-day-total{font-family:'JetBrains Mono',monospace;font-size:12px}
+.coll-day-body{padding:0 10px 10px}
+.coll-day-body .op-card{border-radius:8px;margin-top:6px}
+.cat-type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0}
+.cat-type-btn{padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.cat-type-btn.active.expense{background:rgba(255,107,122,.15);border-color:var(--red);color:var(--red)}
+.cat-type-btn.active.income{background:rgba(78,204,163,.15);border-color:var(--green);color:var(--green)}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;max-width:430px;margin:0 auto}
+#login-screen h1{font-size:28px;font-weight:700;margin-bottom:6px;letter-spacing:-.5px}
+#login-screen p{color:var(--text2);font-size:13px;margin-bottom:36px;text-align:center;line-height:1.6}
+#login-screen .logo{font-size:48px;margin-bottom:20px}
+.login-error{color:var(--red);font-size:12px;margin-top:8px;min-height:16px;text-align:center}
+
+/* SYNC INDICATOR */
+#sync-indicator{position:fixed;top:env(safe-area-inset-top,0px);right:0;left:0;max-width:430px;margin:0 auto;z-index:500;pointer-events:none}
+.sync-badge{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:0 0 10px 10px;padding:6px 14px;font-size:11px;color:var(--text3);width:fit-content;margin:0 auto;opacity:0;transition:.3s;font-weight:500}
+.sync-badge.show{opacity:1}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </head>
 <body>
+<!-- SYNC INDICATOR -->
+<div id="sync-indicator"><div class="sync-badge" id="sync-badge"><span class="sync-dot"></span> Синхронизация...</div></div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="logo">💰</div>
+  <h1>Budget VND</h1>
+  <p>Войдите чтобы данные<br>сохранялись в облаке</p>
+  <div class="form-group" style="width:100%;max-width:340px">
+    <label class="form-label">Email</label>
+    <input class="form-input" id="login-email" type="email" placeholder="your@email.com" autocomplete="email"/>
+  </div>
+  <div class="form-group" style="width:100%;max-width:340px">
+    <label class="form-label">Пароль</label>
+    <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()"/>
+  </div>
+  <div class="login-error" id="login-error"></div>
+  <button class="btn btn-primary" style="width:100%;max-width:340px;margin-top:12px" onclick="doLogin()">Войти</button>
+</div>
+
 <div id="app">
   <!-- PAGES -->
   <div class="page active" id="page-home">
@@ -260,7 +321,17 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
       </div>
       <div class="cats-list" id="cats-list"></div>
     </div>
-  </div>
+    <div class="settings-section">
+      <div class="settings-card">
+        <div class="settings-row" onclick="doLogout()" style="color:var(--red)">
+          <div>
+            <div class="row-label" style="color:var(--red)">Выйти из аккаунта</div>
+            <div class="row-sub" id="settings-email"></div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--red)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
+      </div>
+    </div>
 
   <!-- NAV -->
   <nav>
@@ -304,6 +375,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
       </div>
       <div class="amount-suggestions" id="amount-suggestions"></div>
     </div>
+    <button class="btn btn-primary" id="op-save-btn" onclick="saveOperation()" style="margin-bottom:16px">Сохранить</button>
     <div class="form-group">
       <label class="form-label">Категория</label>
       <div class="cats-picker" id="cats-picker"></div>
@@ -316,8 +388,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
       <label class="form-label">Комментарий</label>
       <input class="form-input" id="op-comment" type="text" placeholder="Необязательно"/>
     </div>
-    <button class="btn btn-primary" id="op-save-btn" onclick="saveOperation()">Сохранить</button>
-    <button class="btn btn-ghost" id="op-del-btn" onclick="deleteCurrentOp()" style="display:none;margin-top:8px">Удалить операцию</button>
+    <button class="btn btn-ghost" id="op-del-btn" onclick="deleteCurrentOp()" style="display:none">Удалить операцию</button>
   </div>
 </div>
 
@@ -355,6 +426,13 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     <div class="modal-handle"></div>
     <div class="modal-title">Новая категория</div>
     <div class="form-group">
+      <label class="form-label">Тип категории</label>
+      <div class="cat-type-toggle">
+        <button class="cat-type-btn expense active" id="cat-type-expense" onclick="selectCatType('expense')">— Расход</button>
+        <button class="cat-type-btn income" id="cat-type-income" onclick="selectCatType('income')">+ Доход</button>
+      </div>
+    </div>
+    <div class="form-group">
       <label class="form-label">Название</label>
       <input class="form-input" id="cat-name-input" type="text" placeholder="Еда, Транспорт..."/>
     </div>
@@ -386,35 +464,144 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
   </div>
 </div>
 
-<script>
+<script type="module">
+// ─── FIREBASE ────────────────────────────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc }
+  from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDW6_nCv0uj4uhQ6WBNc0hOwyMlR3MnhrE",
+  authDomain: "flowpay-7460e.firebaseapp.com",
+  projectId: "flowpay-7460e",
+  storageBucket: "flowpay-7460e.firebasestorage.app",
+  messagingSenderId: "537984272877",
+  appId: "1:537984272877:web:a7f8a084d8c0ceb38b7fe4"
+};
+const fbApp = initializeApp(firebaseConfig);
+const auth  = getAuth(fbApp);
+const db    = getFirestore(fbApp);
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const COLORS = ['#f5a623','#e8845a','#ff6b7a','#4ecca3','#5b8dee','#a78bfa','#f472b6','#34d399','#fb923c','#818cf8'];
 const ICONS  = ['🍜','🍕','🍺','☕','🚗','🚌','🏠','💊','🛍️','🎬','💡','📱','✈️','🎮','🐶','📚','💪','🎵','🏋️','💰'];
 const DAYS   = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 
-function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
-function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+const DEFAULT_CATS = [
+  {id:'c1',name:'Еда',color:'#f5a623',icon:'🍜',type:'expense'},
+  {id:'c2',name:'Транспорт',color:'#5b8dee',icon:'🚗',type:'expense'},
+  {id:'c3',name:'Развлечения',color:'#a78bfa',icon:'🎬',type:'expense'},
+  {id:'c4',name:'Здоровье',color:'#4ecca3',icon:'💊',type:'expense'},
+];
 
-let operations  = load('ops',[]);
-let categories  = load('cats',[
-  {id:'c1',name:'Еда',color:'#f5a623',icon:'🍜'},
-  {id:'c2',name:'Транспорт',color:'#5b8dee',icon:'🚗'},
-  {id:'c3',name:'Развлечения',color:'#a78bfa',icon:'🎬'},
-  {id:'c4',name:'Здоровье',color:'#4ecca3',icon:'💊'},
-]);
-let weeklyBudget = load('budget',0);
-let weekStartDay = load('weekStart',4); // 4 = Thursday
+// localStorage cache helpers
+function lsLoad(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
+function lsSave(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let operations   = lsLoad('ops',[]);
+let categories   = lsLoad('cats',DEFAULT_CATS);
+let weeklyBudget = lsLoad('budget',0);
+let weekStartDay = lsLoad('weekStart',4);
 let histPeriod   = 'week';
 let repPeriod    = 'week';
 let currentPage  = 'home';
+let currentUser  = null;
+let syncTimer    = null;
 
-// edit state
-let editingOpId  = null;
-let selectedType = 'expense';
-let selectedCat  = null;
-let selectedColor = COLORS[0];
-let selectedIcon  = ICONS[0];
-let selectedWeekday = weekStartDay;
+// ─── FIRESTORE SYNC ──────────────────────────────────────────────────────────
+async function loadFromCloud(){
+  if(!currentUser) return;
+  try{
+    const ref = doc(db, 'users', currentUser.uid, 'appdata', 'main');
+    const snap = await getDoc(ref);
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.operations)   operations   = d.operations;
+      if(d.categories)   categories   = d.categories;
+      if(d.weeklyBudget !== undefined) weeklyBudget = d.weeklyBudget;
+      if(d.weekStartDay !== undefined) weekStartDay = d.weekStartDay;
+      // update local cache
+      lsSave('ops', operations);
+      lsSave('cats', categories);
+      lsSave('budget', weeklyBudget);
+      lsSave('weekStart', weekStartDay);
+    }
+    renderAll();
+  } catch(e){ console.warn('Cloud load error:', e); }
+}
+
+function saveToCloud(){
+  if(!currentUser) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async ()=>{
+    showSync(true);
+    try{
+      const ref = doc(db, 'users', currentUser.uid, 'appdata', 'main');
+      await setDoc(ref, { operations, categories, weeklyBudget, weekStartDay });
+      // update local cache
+      lsSave('ops', operations);
+      lsSave('cats', categories);
+      lsSave('budget', weeklyBudget);
+      lsSave('weekStart', weekStartDay);
+    } catch(e){ console.warn('Cloud save error:', e); }
+    showSync(false);
+  }, 1500);
+}
+
+function showSync(on){
+  const b = document.getElementById('sync-badge');
+  b.classList.toggle('show', on);
+}
+
+function save(k,v){
+  if(k==='ops')         operations   = v;
+  if(k==='cats')        categories   = v;
+  if(k==='budget')      weeklyBudget = v;
+  if(k==='weekStart')   weekStartDay = v;
+  saveToCloud();
+}
+
+// ─── AUTH ────────────────────────────────────────────────────────────────────
+window.doLogin = async function(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  if(!email||!pass){ errEl.textContent='Введите email и пароль'; return; }
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e){
+    const msgs = {
+      'auth/invalid-credential':'Неверный email или пароль',
+      'auth/user-not-found':'Пользователь не найден',
+      'auth/wrong-password':'Неверный пароль',
+      'auth/too-many-requests':'Слишком много попыток, подождите',
+    };
+    errEl.textContent = msgs[e.code] || 'Ошибка входа: '+e.message;
+  }
+};
+
+window.doLogout = async function(){
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  const loginScreen = document.getElementById('login-screen');
+  const appEl       = document.getElementById('app');
+  if(user){
+    loginScreen.style.display = 'none';
+    appEl.style.display = '';
+    const emailEl = document.getElementById('settings-email');
+    if(emailEl) emailEl.textContent = user.email;
+    await loadFromCloud();
+  } else {
+    loginScreen.style.display = 'flex';
+    appEl.style.display = 'none';
+  }
+});
 
 // ─── FORMAT ──────────────────────────────────────────────────────────────────
 function fmtVND(n){
@@ -424,28 +611,25 @@ function fmtVND(n){
 function parseVND(s){
   return parseInt(s.replace(/[^\d]/g,''))||0;
 }
-function onAmountInput(el){
+window.onAmountInput = function(el){
   let raw = el.value.replace(/[^\d]/g,'');
   let num = parseInt(raw)||0;
-  // format
   el.value = raw ? fmtVND(num) : '';
-  // suggestions
   if(el.id === 'op-amount') renderSuggestions(num);
-}
+};
 function renderSuggestions(num){
   const box = document.getElementById('amount-suggestions');
   if(!num){box.innerHTML='';return}
   const mults = [10,100,1000,10000];
   box.innerHTML = mults.map(m=>`<span class="suggestion" onclick="applySuggestion(${num*m})">${fmtVND(num*m)}</span>`).join('');
 }
-function applySuggestion(val){
+window.applySuggestion = function(val){
   document.getElementById('op-amount').value = fmtVND(val);
   renderSuggestions(val);
-}
+};
 
 // ─── DATES ───────────────────────────────────────────────────────────────────
 function getVNNow(){
-  // Vietnam = UTC+7, всегда
   return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
 }
 function dateStr(d=null){
@@ -455,7 +639,7 @@ function dateStr(d=null){
 function getWeekStart(dayNum){
   const now = getVNNow();
   const dow = now.getDay();
-  let diff = (dow - dayNum + 7) % 7;
+  const diff = (dow - dayNum + 7) % 7;
   const start = new Date(now);
   start.setDate(now.getDate() - diff);
   start.setHours(0,0,0,0);
@@ -479,50 +663,47 @@ function inPeriod(op, period){
 function daysLeftInWeek(){
   const now = getVNNow();
   const dow = now.getDay();
-  // сколько дней до следующего начала недели (включая сегодня)
-  let d = (weekStartDay - dow + 7) % 7;
+  const d = (weekStartDay - dow + 7) % 7;
   return d === 0 ? 7 : d;
 }
 function calcBudget(){
   const todayStr = dateStr();
-  const spentToday = operations
-    .filter(o=>o.type==='expense' && o.date===todayStr)
-    .reduce((s,o)=>s+o.amount,0);
-  const spentWeek = operations
-    .filter(o=>o.type==='expense' && inPeriod(o,'week'))
-    .reduce((s,o)=>s+o.amount,0);
-  const remWeek = weeklyBudget - spentWeek;
+  const spentToday = operations.filter(o=>o.type==='expense'&&o.date===todayStr).reduce((s,o)=>s+o.amount,0);
+  const spentWeek  = operations.filter(o=>o.type==='expense'&&inPeriod(o,'week')).reduce((s,o)=>s+o.amount,0);
+  const remWeek  = weeklyBudget - spentWeek;
   const daysLeft = daysLeftInWeek();
-  const daily = daysLeft > 0 ? remWeek / daysLeft : 0;
-  return {
-    daily,
-    remToday: daily - spentToday,
-    remWeek,
-    spentToday, spentWeek
-  };
+  const daily    = daysLeft > 0 ? remWeek / daysLeft : 0;
+  return { daily, remToday: daily - spentToday, remWeek, spentToday, spentWeek };
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
-function goTo(page){
+window.goTo = function(page){
   currentPage = page;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('nav button').forEach((b,i)=>{
     b.classList.toggle('active', ['home','history','reports','settings'][i]===page);
   });
-  if(page==='home') renderHome();
-  if(page==='history') renderHistory();
-  if(page==='reports') renderReports();
+  if(page==='home')     renderHome();
+  if(page==='history')  renderHistory();
+  if(page==='reports')  renderReports();
   if(page==='settings') renderSettings();
+};
+
+function renderAll(){
+  renderHome();
+  if(currentPage==='history')  renderHistory();
+  if(currentPage==='reports')  renderReports();
+  if(currentPage==='settings') renderSettings();
 }
 
 // ─── RENDER HOME ─────────────────────────────────────────────────────────────
 function renderHome(){
-  const h = new Date().getHours();
+  const h = getVNNow().getHours();
   const greet = h<12?'Доброе утро ☀️':h<17?'Добрый день 👋':'Добрый вечер 🌙';
   document.getElementById('greeting').textContent = greet;
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
-  
+
   const {daily, remToday, remWeek} = calcBudget();
   const heroEl = document.getElementById('hero-today');
   heroEl.textContent = fmtVND(Math.abs(remToday)) + ' ₫';
@@ -536,23 +717,15 @@ function renderHome(){
 
   document.getElementById('hero-daily').textContent = fmtVND(daily) + ' ₫';
 
-  // quick cats — сортировка по частоте использования
   const usageCount = {};
   operations.forEach(o=>{ usageCount[o.category]=(usageCount[o.category]||0)+1; });
   const sortedCats = [...categories].sort((a,b)=>(usageCount[b.id]||0)-(usageCount[a.id]||0));
-  const qc = document.getElementById('quick-cats');
-  qc.innerHTML = sortedCats.map(c=>`
-    <div class="quick-cat" onclick="openAddOpModal(null,'${c.id}')">
-      <span>${c.icon}</span>
-      <span>${c.name}</span>
-    </div>`).join('');
+  document.getElementById('quick-cats').innerHTML = sortedCats.map(c=>`
+    <div class="quick-cat" onclick="openAddOpModal(null,'${c.id}')"><span>${c.icon}</span><span>${c.name}</span></div>`).join('');
 
-  // recent 5
   const recent = [...operations].sort((a,b)=>b.id.localeCompare(a.id)).slice(0,5);
   const ro = document.getElementById('recent-ops');
-  if(!recent.length){
-    ro.innerHTML='<div class="empty"><p>Операций пока нет</p></div>';return;
-  }
+  if(!recent.length){ ro.innerHTML='<div class="empty"><p>Операций пока нет</p></div>'; return; }
   ro.innerHTML = recent.map(o=>opCardHTML(o)).join('');
 }
 
@@ -571,95 +744,255 @@ function opCardHTML(o){
 
 function formatDate(d){
   const today = dateStr();
-  const yest = dateStr(new Date(Date.now()-86400000));
+  const yest  = dateStr(getVNNow());
+  const yd = new Date(yest+'T00:00:00'); yd.setDate(yd.getDate()-1);
+  const yesterdayStr = dateStr(yd);
   if(d===today) return 'Сегодня';
-  if(d===yest) return 'Вчера';
+  if(d===yesterdayStr) return 'Вчера';
   return new Date(d+'T00:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 }
 
-// ─── RENDER HISTORY ──────────────────────────────────────────────────────────
-function setHistPeriod(p){
-  histPeriod=p;
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+let openHistGroups = new Set();
+
+function fmtShort(ds){
+  const d = new Date(ds+'T00:00:00');
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
+}
+function fmtMonthYear(ds){
+  return new Date(ds+'T00:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+}
+function getWeekKeyForDs(ds){
+  const d = new Date(ds+'T00:00:00');
+  const diff = (d.getDay()-weekStartDay+7)%7;
+  d.setDate(d.getDate()-diff);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function getWeekEndKeyForStart(startDs){
+  const d = new Date(startDs+'T00:00:00');
+  d.setDate(d.getDate()+6);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function weekRangeLabel(startDs){
+  const endDs = getWeekEndKeyForStart(startDs);
+  const sd = new Date(startDs+'T00:00:00');
+  const ed = new Date(endDs+'T00:00:00');
+  return `${DAYS[sd.getDay()]} ${fmtShort(startDs)} — ${DAYS[ed.getDay()]} ${fmtShort(endDs)}`;
+}
+
+window.toggleHistGroup = function(key){
+  if(openHistGroups.has(key)) openHistGroups.delete(key); else openHistGroups.add(key);
+  renderHistory();
+};
+window.setHistPeriod = function(p){
+  histPeriod=p; openHistGroups.clear();
   document.querySelectorAll('#page-history .period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));
   renderHistory();
-}
+};
+
 function renderHistory(){
   const filtered = operations.filter(o=>inPeriod(o,histPeriod));
-  if(!filtered.length){
-    document.getElementById('history-container').innerHTML='<div class="empty"><p>Нет операций за период</p></div>';
-    return;
-  }
-  // group by date
-  const groups = {};
-  filtered.forEach(o=>{
-    if(!groups[o.date]) groups[o.date]=[];
-    groups[o.date].push(o);
+  const container = document.getElementById('history-container');
+  if(!filtered.length){ container.innerHTML='<div class="empty"><p>Нет операций за период</p></div>'; return; }
+  const byDay={};
+  filtered.forEach(o=>{ if(!byDay[o.date])byDay[o.date]=[]; byDay[o.date].push(o); });
+  if(histPeriod==='week') container.innerHTML = renderWeekGroups(byDay, true);
+  else container.innerHTML = renderMonthGroups(byDay);
+}
+
+function dayBlock_inner(date,ops){
+  const key='day_'+date;
+  const isOpen=openHistGroups.has(key);
+  const exp=ops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+  const inc=ops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+  const label=new Date(date+'T00:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short',weekday:'short'});
+  return `<div class="coll-day">
+    <div class="coll-day-header ${isOpen?'open':''}" onclick="toggleHistGroup('${key}')">
+      <span class="coll-day-label">${label}</span>
+      ${exp?`<span class="coll-exp" style="font-family:'JetBrains Mono',monospace;font-size:11px">−${fmtVND(exp)}</span>`:''}
+      ${inc?`<span class="coll-inc" style="font-family:'JetBrains Mono',monospace;font-size:11px">+${fmtVND(inc)}</span>`:''}
+      <span class="coll-chevron">›</span>
+    </div>
+    ${isOpen?`<div class="coll-day-body">${ops.sort((a,b)=>b.id.localeCompare(a.id)).map(o=>opCardHTML(o)).join('')}</div>`:''}
+  </div>`;
+}
+
+function renderWeekGroups(byDay, singleWeek){
+  const weekMap={};
+  Object.keys(byDay).forEach(ds=>{
+    const wk=getWeekKeyForDs(ds);
+    if(!weekMap[wk])weekMap[wk]=[];
+    weekMap[wk]=weekMap[wk].concat(byDay[ds].map(o=>({...o,_date:ds})));
   });
-  const sorted = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
-  document.getElementById('history-container').innerHTML = sorted.map(date=>{
-    const ops = groups[date];
-    const total = ops.reduce((s,o)=>s+(o.type==='expense'?-o.amount:o.amount),0);
-    const sign = total>=0?'+':'−';
-    return `<div>
-      <div class="history-date">
-        <span>${formatDate(date)}</span>
-        <span class="date-total" style="color:${total>=0?'var(--green)':'var(--red)'}">${sign}${fmtVND(Math.abs(total))} ₫</span>
+  return Object.keys(weekMap).sort((a,b)=>b.localeCompare(a)).map(wk=>{
+    const key='wk_'+wk;
+    const isOpen=openHistGroups.has(key)||singleWeek;
+    const ops=weekMap[wk];
+    const exp=ops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+    const inc=ops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+    const daysInWeek={};
+    ops.forEach(o=>{ if(!daysInWeek[o._date])daysInWeek[o._date]=[]; daysInWeek[o._date].push(o); });
+    const dayKeys=Object.keys(daysInWeek).sort((a,b)=>b.localeCompare(a));
+    return `<div class="coll-group">
+      <div class="coll-header ${isOpen?'open':''}" ${singleWeek?'':'onclick="toggleHistGroup(\''+key+'\')"'}>
+        <span class="coll-period">${weekRangeLabel(wk)}</span>
+        <div class="coll-stats">
+          ${exp?`<span class="coll-exp">−${fmtVND(exp)}</span>`:''}
+          ${inc?`<span class="coll-inc">+${fmtVND(inc)}</span>`:''}
+          ${singleWeek?'':'<span class="coll-chevron">›</span>'}
+        </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${ops.sort((a,b)=>b.id.localeCompare(a.id)).map(o=>opCardHTML(o)).join('')}
-      </div>
+      ${isOpen?`<div class="coll-body">${dayKeys.map(d=>{
+        const dayOps=daysInWeek[d].map(o=>operations.find(x=>x.id===o.id)||o);
+        return dayBlock_inner(d,dayOps);
+      }).join('')}</div>`:''}
     </div>`;
   }).join('');
 }
 
-// ─── RENDER REPORTS ──────────────────────────────────────────────────────────
-function setRepPeriod(p){
-  repPeriod=p;
+function renderMonthGroups(byDay){
+  const monthMap={};
+  Object.keys(byDay).forEach(ds=>{
+    const mk=ds.slice(0,7);
+    if(!monthMap[mk])monthMap[mk]=[];
+    monthMap[mk]=monthMap[mk].concat(byDay[ds].map(o=>({...o,_date:ds})));
+  });
+  return Object.keys(monthMap).sort((a,b)=>b.localeCompare(a)).map(mk=>{
+    const key='mo_'+mk;
+    const isOpen=openHistGroups.has(key);
+    const ops=monthMap[mk];
+    const exp=ops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+    const inc=ops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+    const byDayInMonth={};
+    ops.forEach(o=>{ if(!byDayInMonth[o._date])byDayInMonth[o._date]=[]; byDayInMonth[o._date].push(o); });
+    return `<div class="coll-group">
+      <div class="coll-header ${isOpen?'open':''}" onclick="toggleHistGroup('${key}')">
+        <span class="coll-period">${fmtMonthYear(mk+'-01')}</span>
+        <div class="coll-stats">
+          ${exp?`<span class="coll-exp">−${fmtVND(exp)}</span>`:''}
+          ${inc?`<span class="coll-inc">+${fmtVND(inc)}</span>`:''}
+          <span class="coll-chevron">›</span>
+        </div>
+      </div>
+      ${isOpen?`<div class="coll-body">${renderWeekGroupsInner(byDayInMonth)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderWeekGroupsInner(byDay){
+  const weekMap={};
+  Object.keys(byDay).forEach(ds=>{
+    const wk=getWeekKeyForDs(ds);
+    if(!weekMap[wk])weekMap[wk]=[];
+    weekMap[wk]=weekMap[wk].concat(byDay[ds].map(o=>({...o,_date:ds})));
+  });
+  return Object.keys(weekMap).sort((a,b)=>b.localeCompare(a)).map(wk=>{
+    const key='wk_'+wk;
+    const isOpen=openHistGroups.has(key);
+    const ops=weekMap[wk];
+    const exp=ops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+    const inc=ops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+    const daysInWeek={};
+    ops.forEach(o=>{ if(!daysInWeek[o._date])daysInWeek[o._date]=[]; daysInWeek[o._date].push(o); });
+    return `<div class="coll-day">
+      <div class="coll-day-header ${isOpen?'open':''}" onclick="toggleHistGroup('${key}')">
+        <span class="coll-day-label">${weekRangeLabel(wk)}</span>
+        ${exp?`<span class="coll-exp" style="font-family:'JetBrains Mono',monospace;font-size:11px">−${fmtVND(exp)}</span>`:''}
+        ${inc?`<span class="coll-inc" style="font-family:'JetBrains Mono',monospace;font-size:11px">+${fmtVND(inc)}</span>`:''}
+        <span class="coll-chevron">›</span>
+      </div>
+      ${isOpen?`<div class="coll-day-body">${Object.keys(daysInWeek).sort((a,b)=>b.localeCompare(a)).map(d=>{
+        const dayOps=daysInWeek[d].map(o=>operations.find(x=>x.id===o.id)||o);
+        return dayBlock_inner(d,dayOps);
+      }).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ─── REPORTS ─────────────────────────────────────────────────────────────────
+let openRepGroups = new Set();
+
+window.setRepPeriod = function(p){
+  repPeriod=p; openRepGroups.clear();
   document.querySelectorAll('#page-reports .period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));
   renderReports();
+};
+window.toggleRepGroup = function(key){
+  if(openRepGroups.has(key)) openRepGroups.delete(key); else openRepGroups.add(key);
+  renderReports();
+};
+
+function catBarsHTML(ops){
+  const byCat={};
+  ops.filter(o=>o.type==='expense').forEach(o=>{ byCat[o.category]=(byCat[o.category]||0)+o.amount; });
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxVal=sorted[0]?sorted[0][1]:1;
+  if(!sorted.length) return '<p style="color:var(--text3);font-size:12px;padding:4px 0">Нет расходов</p>';
+  return sorted.map(([catId,val])=>{
+    const cat=categories.find(c=>c.id===catId)||{name:'Без категории',color:'#666',icon:''};
+    const pct=(val/maxVal*100).toFixed(1);
+    return `<div class="bar-item">
+      <div class="bar-label"><span class="cat-name">${cat.icon} ${cat.name}</span><span class="cat-val">${fmtVND(val)} ₫</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cat.color}"></div></div>
+    </div>`;
+  }).join('');
 }
+
 function renderReports(){
   const filtered = operations.filter(o=>inPeriod(o,repPeriod));
-  const expenses = filtered.filter(o=>o.type==='expense');
-  const incomes  = filtered.filter(o=>o.type==='income');
-  const totalExp = expenses.reduce((s,o)=>s+o.amount,0);
-  const totalInc = incomes.reduce((s,o)=>s+o.amount,0);
-
-  // by category
-  const byCat = {};
-  expenses.forEach(o=>{
-    byCat[o.category]=(byCat[o.category]||0)+o.amount;
-  });
-  const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  const maxCat = catsSorted[0]?catsSorted[0][1]:1;
-
-  document.getElementById('reports-container').innerHTML = `
-    <div class="report-summary">
-      <div class="summary-card"><div class="s-label">РАСХОДЫ</div><div class="s-val red">${fmtVND(totalExp)} ₫</div></div>
-      <div class="summary-card"><div class="s-label">ДОХОДЫ</div><div class="s-val green">${fmtVND(totalInc)} ₫</div></div>
-    </div>
-    <div class="report-bar">
-      <div class="report-bar-title">Расходы по категориям</div>
-      ${catsSorted.length ? catsSorted.map(([catId,val])=>{
-        const cat = categories.find(c=>c.id===catId)||{name:'Без категории',color:'#666'};
-        const pct = (val/maxCat*100).toFixed(1);
-        return `<div class="bar-item">
-          <div class="bar-label">
-            <span class="cat-name">${cat.icon||''} ${cat.name}</span>
-            <span class="cat-val">${fmtVND(val)} ₫</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${cat.color}"></div></div>
-        </div>`;
-      }).join('') : '<p style="color:var(--text3);font-size:13px">Нет расходов за период</p>'}
-    </div>`;
+  const totalExp = filtered.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+  const totalInc = filtered.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+  let html=`<div class="report-summary">
+    <div class="summary-card"><div class="s-label">РАСХОДЫ</div><div class="s-val red">${fmtVND(totalExp)} ₫</div></div>
+    <div class="summary-card"><div class="s-label">ДОХОДЫ</div><div class="s-val green">${fmtVND(totalInc)} ₫</div></div>
+  </div>`;
+  if(!filtered.length){ html+='<div class="empty"><p>Нет операций за период</p></div>'; document.getElementById('reports-container').innerHTML=html; return; }
+  if(repPeriod==='week'){
+    const dates=filtered.map(o=>o.date).sort();
+    html+=`<div class="report-bar"><div class="report-bar-title">${weekRangeLabel(getWeekKeyForDs(dates[0]))}</div>${catBarsHTML(filtered)}</div>`;
+  } else {
+    const monthMap={};
+    filtered.forEach(o=>{ const mk=o.date.slice(0,7); if(!monthMap[mk])monthMap[mk]=[]; monthMap[mk].push(o); });
+    html+=Object.keys(monthMap).sort((a,b)=>b.localeCompare(a)).map(mk=>{
+      const key='rep_mo_'+mk; const isOpen=openRepGroups.has(key);
+      const mops=monthMap[mk];
+      const mexp=mops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+      const minc=mops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+      const weekMap2={};
+      mops.forEach(o=>{ const wk=getWeekKeyForDs(o.date); if(!weekMap2[wk])weekMap2[wk]=[]; weekMap2[wk].push(o); });
+      return `<div class="coll-group">
+        <div class="coll-header ${isOpen?'open':''}" onclick="toggleRepGroup('${key}')">
+          <span class="coll-period">${fmtMonthYear(mk+'-01')}</span>
+          <div class="coll-stats">${mexp?`<span class="coll-exp">−${fmtVND(mexp)}</span>`:''} ${minc?`<span class="coll-inc">+${fmtVND(minc)}</span>`:''}<span class="coll-chevron">›</span></div>
+        </div>
+        ${isOpen?`<div class="coll-body">${Object.keys(weekMap2).sort((a,b)=>b.localeCompare(a)).map(wk=>{
+          const key2='rep_wk_'+wk; const isOpen2=openRepGroups.has(key2);
+          const wops=weekMap2[wk];
+          const wexp=wops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+          const winc=wops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+          return `<div class="coll-day">
+            <div class="coll-day-header ${isOpen2?'open':''}" onclick="toggleRepGroup('${key2}')">
+              <span class="coll-day-label">${weekRangeLabel(wk)}</span>
+              ${wexp?`<span class="coll-exp" style="font-family:'JetBrains Mono',monospace;font-size:11px">−${fmtVND(wexp)}</span>`:''}
+              ${winc?`<span class="coll-inc" style="font-family:'JetBrains Mono',monospace;font-size:11px">+${fmtVND(winc)}</span>`:''}
+              <span class="coll-chevron">›</span>
+            </div>
+            ${isOpen2?`<div class="coll-day-body" style="padding:12px 16px"><div class="report-bar" style="margin:0;padding:0;border:none;background:none">${catBarsHTML(wops)}</div></div>`:''}
+          </div>`;
+        }).join('')}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('reports-container').innerHTML=html;
 }
 
-// ─── RENDER SETTINGS ─────────────────────────────────────────────────────────
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
 function renderSettings(){
   document.getElementById('setting-budget').textContent = fmtVND(weeklyBudget) + ' ₫';
   document.getElementById('setting-weekday').textContent = DAYS[weekStartDay];
-  const cl = document.getElementById('cats-list');
-  cl.innerHTML = categories.map(c=>`
+  const emailEl = document.getElementById('settings-email');
+  if(emailEl && currentUser) emailEl.textContent = currentUser.email;
+  document.getElementById('cats-list').innerHTML = categories.map(c=>`
     <div class="cat-item">
       <div class="cat-dot" style="background:${c.color}"></div>
       <span style="font-size:18px">${c.icon}</span>
@@ -671,16 +1004,16 @@ function renderSettings(){
 }
 
 // ─── MODAL: ADD/EDIT OP ──────────────────────────────────────────────────────
-function openAddOpModal(opId=null, prefillCat=null){
-  editingOpId = opId;
-  selectedType = 'expense';
-  selectedCat = prefillCat;
+let editingOpId  = null;
+let selectedType = 'expense';
+let selectedCat  = null;
 
+window.openAddOpModal = function(opId=null, prefillCat=null){
+  editingOpId = opId; selectedType = 'expense'; selectedCat = prefillCat;
   if(opId){
     const op = operations.find(o=>o.id===opId);
     if(op){
-      selectedType = op.type;
-      selectedCat = op.category;
+      selectedType = op.type; selectedCat = op.category;
       document.getElementById('op-amount').value = fmtVND(op.amount);
       document.getElementById('op-comment').value = op.comment||'';
       document.getElementById('op-date').value = op.date;
@@ -697,239 +1030,194 @@ function openAddOpModal(opId=null, prefillCat=null){
     document.getElementById('op-del-btn').style.display='none';
     renderSuggestions(0);
   }
-
-  // type buttons
-  updateTypeButtons();
-
-  // cats picker
-  const cp = document.getElementById('cats-picker');
-  cp.innerHTML = categories.map(c=>`
-    <div class="cat-pick ${c.id===selectedCat?'selected':''}" onclick="selectCat('${c.id}')">
-      <span class="dot" style="background:${c.color}"></span>${c.icon} ${c.name}
-    </div>`).join('');
-
+  updateTypeButtons(); updateCatsPicker();
   openModal('overlay-op');
-}
-function openEditOpModal(id){ openAddOpModal(id); }
+};
+window.openEditOpModal = window.openAddOpModal;
 
-function selectType(t){
-  selectedType=t;
-  updateTypeButtons();
-}
+window.selectType = function(t){ selectedType=t; updateTypeButtons(); updateCatsPicker(); };
 function updateTypeButtons(){
   document.getElementById('type-expense').className='type-btn expense'+(selectedType==='expense'?' active':'');
   document.getElementById('type-income').className='type-btn income'+(selectedType==='income'?' active':'');
 }
-function selectCat(id){
+function updateCatsPicker(){
+  const visible = categories.filter(c=>!c.type||c.type===selectedType);
+  if(selectedCat && !visible.find(c=>c.id===selectedCat)) selectedCat=null;
+  const cp = document.getElementById('cats-picker');
+  if(!cp) return;
+  cp.innerHTML = visible.map(c=>`
+    <div class="cat-pick ${c.id===selectedCat?'selected':''}" onclick="selectCat('${c.id}')">
+      <span class="dot" style="background:${c.color}"></span>${c.icon} ${c.name}
+    </div>`).join('');
+}
+window.selectCat = function(id){
   selectedCat=id;
   document.querySelectorAll('#cats-picker .cat-pick').forEach(el=>{
-    el.classList.toggle('selected', el.onclick.toString().includes("'"+id+"'"));
-  });
-  // re-render cleaner way
-  document.querySelectorAll('#cats-picker .cat-pick').forEach(el=>{
-    const elId = el.getAttribute('onclick').match(/'([^']+)'/)[1];
+    const elId=el.getAttribute('onclick').match(/'([^']+)'/)?.[1];
     el.classList.toggle('selected', elId===id);
   });
-}
-function saveOperation(){
+};
+window.saveOperation = function(){
   const amountRaw = parseVND(document.getElementById('op-amount').value);
   if(!amountRaw){ alert('Введите сумму'); return; }
   if(!selectedCat){ alert('Выберите категорию'); return; }
-
   if(editingOpId){
     const idx = operations.findIndex(o=>o.id===editingOpId);
-    if(idx>-1){
-      operations[idx] = {...operations[idx],
-        amount: amountRaw,
-        type: selectedType,
-        category: selectedCat,
-        comment: document.getElementById('op-comment').value.trim(),
-        date: document.getElementById('op-date').value
-      };
-    }
+    if(idx>-1) operations[idx] = {...operations[idx], amount:amountRaw, type:selectedType, category:selectedCat,
+      comment:document.getElementById('op-comment').value.trim(), date:document.getElementById('op-date').value};
   } else {
-    operations.push({
-      id: 'op_'+Date.now(),
-      amount: amountRaw,
-      type: selectedType,
-      category: selectedCat,
-      comment: document.getElementById('op-comment').value.trim(),
-      date: dateStr(),
-      createdAt: new Date().toISOString()
-    });
+    operations.push({ id:'op_'+Date.now(), amount:amountRaw, type:selectedType, category:selectedCat,
+      comment:document.getElementById('op-comment').value.trim(), date:dateStr(), createdAt:new Date().toISOString() });
   }
   save('ops', operations);
-  closeModal('overlay-op');
-  renderHome();
-  if(currentPage==='history') renderHistory();
-  if(currentPage==='reports') renderReports();
-}
-function deleteCurrentOp(){
+  closeModal('overlay-op'); renderAll();
+};
+window.deleteCurrentOp = function(){
   if(!editingOpId) return;
   operations = operations.filter(o=>o.id!==editingOpId);
   save('ops', operations);
-  closeModal('overlay-op');
-  renderHome();
-  if(currentPage==='history') renderHistory();
-  if(currentPage==='reports') renderReports();
-}
+  closeModal('overlay-op'); renderAll();
+};
 
 // ─── MODAL: BUDGET ───────────────────────────────────────────────────────────
-function openBudgetModal(){
+window.openBudgetModal = function(){
   document.getElementById('budget-input').value = weeklyBudget ? fmtVND(weeklyBudget) : '';
   openModal('overlay-budget');
-}
-function saveBudget(){
+};
+window.saveBudget = function(){
   weeklyBudget = parseVND(document.getElementById('budget-input').value);
   save('budget', weeklyBudget);
-  closeModal('overlay-budget');
-  renderSettings();
-  renderHome();
-}
+  closeModal('overlay-budget'); renderSettings(); renderHome();
+};
 
 // ─── MODAL: WEEKDAY ──────────────────────────────────────────────────────────
-function openWeekdayModal(){
+let selectedWeekday = weekStartDay;
+window.openWeekdayModal = function(){
   selectedWeekday = weekStartDay;
-  const picker = document.getElementById('weekday-picker');
-  picker.innerHTML = DAYS.map((d,i)=>`
-    <button class="wd-btn ${i===selectedWeekday?'active':''}" onclick="selectWeekday(${i})">${d}</button>`).join('');
+  document.getElementById('weekday-picker').innerHTML = DAYS.map((d,i)=>
+    `<button class="wd-btn ${i===selectedWeekday?'active':''}" onclick="selectWeekday(${i})">${d}</button>`).join('');
   openModal('overlay-weekday');
-}
-function selectWeekday(i){
+};
+window.selectWeekday = function(i){
   selectedWeekday=i;
   document.querySelectorAll('.wd-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
-}
-function saveWeekday(){
+};
+window.saveWeekday = function(){
   weekStartDay=selectedWeekday;
-  save('weekStart',weekStartDay);
-  closeModal('overlay-weekday');
-  renderSettings();
-  renderHome();
-}
+  save('weekStart', weekStartDay);
+  closeModal('overlay-weekday'); renderSettings(); renderHome();
+};
 
 // ─── MODAL: ADD CAT ──────────────────────────────────────────────────────────
-function openAddCatModal(){
-  selectedColor=COLORS[0]; selectedIcon=ICONS[0];
+let selectedColor = COLORS[0];
+let selectedIcon  = ICONS[0];
+let selectedCatType = 'expense';
+let iconEditMode = false;
+
+window.selectCatType = function(t){
+  selectedCatType=t;
+  document.getElementById('cat-type-expense').className='cat-type-btn expense'+(t==='expense'?' active':'');
+  document.getElementById('cat-type-income').className='cat-type-btn income'+(t==='income'?' active':'');
+};
+window.openAddCatModal = function(){
+  selectedColor=COLORS[0]; selectedIcon=ICONS[0]; selectedCatType='expense';
   document.getElementById('cat-name-input').value='';
-  // color picker
-  document.getElementById('color-picker').innerHTML = COLORS.map((c,i)=>`
-    <div class="color-opt ${i===0?'selected':''}" style="background:${c}" onclick="selectColor('${c}',this)"></div>`).join('');
-  // icon picker
-  iconEditMode = false;
-  renderIconPicker();
+  document.getElementById('cat-type-expense').className='cat-type-btn expense active';
+  document.getElementById('cat-type-income').className='cat-type-btn income';
+  document.getElementById('color-picker').innerHTML = COLORS.map((c,i)=>
+    `<div class="color-opt ${i===0?'selected':''}" style="background:${c}" onclick="selectColor('${c}',this)"></div>`).join('');
+  iconEditMode=false; renderIconPicker();
   openModal('overlay-cat');
-}
+};
 function renderIconPicker(){
-  const picker = document.getElementById('icon-picker');
-  picker.innerHTML = ICONS.map((ic,i)=>`
+  document.getElementById('icon-picker').innerHTML = ICONS.map((ic,i)=>`
     <div class="emoji-wrap">
       <div class="cat-pick ${ic===selectedIcon?'selected':''}" onclick="selectIcon('${ic}',this)" style="font-size:18px;padding:6px 10px">${ic}</div>
       ${iconEditMode?`<span class="emoji-del-x" onclick="removeIconFromList('${ic}')">×</span>`:''}
     </div>`).join('')
     + `<div id="emoji-add-btn" class="cat-pick" onclick="addCustomEmoji()" style="font-size:18px;padding:6px 10px;color:var(--text3);border-style:dashed">+</div>`;
 }
-let iconEditMode = false;
-function toggleIconEditMode(){
-  iconEditMode = !iconEditMode;
-  const btn = document.getElementById('icon-edit-toggle');
-  btn.textContent = iconEditMode ? 'Готово' : 'Изменить';
-  btn.style.color = iconEditMode ? 'var(--accent)' : 'var(--text3)';
-  const row = document.getElementById('custom-emoji-row');
-  if(row) row.remove();
+window.toggleIconEditMode = function(){
+  iconEditMode=!iconEditMode;
+  const btn=document.getElementById('icon-edit-toggle');
+  btn.textContent=iconEditMode?'Готово':'Изменить';
+  btn.style.color=iconEditMode?'var(--accent)':'var(--text3)';
+  const row=document.getElementById('custom-emoji-row'); if(row)row.remove();
   renderIconPicker();
-}
-function removeIconFromList(ic){
-  const idx = ICONS.indexOf(ic);
-  if(idx>-1) ICONS.splice(idx,1);
-  if(selectedIcon===ic) selectedIcon = ICONS[0]||'';
+};
+window.removeIconFromList = function(ic){
+  const idx=ICONS.indexOf(ic); if(idx>-1)ICONS.splice(idx,1);
+  if(selectedIcon===ic) selectedIcon=ICONS[0]||'';
   renderIconPicker();
-}
-function selectColor(c,el){
+};
+window.selectColor = function(c,el){
   selectedColor=c;
   document.querySelectorAll('.color-opt').forEach(e=>e.classList.remove('selected'));
   el.classList.add('selected');
-}
-function selectIcon(ic,el){
+};
+window.selectIcon = function(ic,el){
   selectedIcon=ic;
   document.querySelectorAll('#icon-picker .cat-pick').forEach(e=>e.classList.remove('selected'));
   el.classList.add('selected');
-}
-function addCustomEmoji(){
-  // show inline input row below picker
-  let existing = document.getElementById('custom-emoji-row');
+};
+window.addCustomEmoji = function(){
+  let existing=document.getElementById('custom-emoji-row');
   if(existing){ existing.querySelector('input').focus(); return; }
-  const row = document.createElement('div');
-  row.id = 'custom-emoji-row';
-  row.style = 'display:flex;gap:8px;margin-top:8px;align-items:center';
-  row.innerHTML = `
-    <input id="custom-emoji-input" type="text" maxlength="4"
-      placeholder="🎉" class="form-input"
-      style="width:80px;text-align:center;font-size:22px;padding:8px"/>
+  const row=document.createElement('div');
+  row.id='custom-emoji-row'; row.style='display:flex;gap:8px;margin-top:8px;align-items:center';
+  row.innerHTML=`<input id="custom-emoji-input" type="text" maxlength="4" placeholder="🎉" class="form-input" style="width:80px;text-align:center;font-size:22px;padding:8px"/>
     <button onclick="confirmCustomEmoji()" class="btn btn-primary" style="flex:1;padding:10px;font-size:13px">Добавить</button>`;
   document.getElementById('icon-picker').after(row);
   row.querySelector('input').focus();
-}
-function confirmCustomEmoji(){
-  const val = document.getElementById('custom-emoji-input').value.trim();
-  if(!val) return;
-  const ic = [...val][0];
-  if(!ICONS.includes(ic)) ICONS.push(ic);
-  selectedIcon = ic;
-  const row = document.getElementById('custom-emoji-row');
-  if(row) row.remove();
+};
+window.confirmCustomEmoji = function(){
+  const val=document.getElementById('custom-emoji-input').value.trim();
+  if(!val)return;
+  const ic=[...val][0];
+  if(!ICONS.includes(ic))ICONS.push(ic);
+  selectedIcon=ic;
+  const row=document.getElementById('custom-emoji-row'); if(row)row.remove();
   renderIconPicker();
-}
-function saveCategory(){
-  const name = document.getElementById('cat-name-input').value.trim();
+};
+window.saveCategory = function(){
+  const name=document.getElementById('cat-name-input').value.trim();
   if(!name){alert('Введите название');return;}
-  categories.push({id:'c_'+Date.now(),name,color:selectedColor,icon:selectedIcon});
-  save('cats',categories);
-  closeModal('overlay-cat');
-  renderSettings();
-  renderHome();
-}
+  categories.push({id:'c_'+Date.now(),name,color:selectedColor,icon:selectedIcon,type:selectedCatType});
+  save('cats', categories);
+  closeModal('overlay-cat'); renderSettings(); renderHome();
+};
 
 // ─── CONFIRM DELETE CAT ──────────────────────────────────────────────────────
-function confirmDeleteCat(catId){
-  const cat = categories.find(c=>c.id===catId);
-  const count = operations.filter(o=>o.category===catId).length;
-  document.getElementById('confirm-title').textContent = `Удалить «${cat.name}»?`;
-  document.getElementById('confirm-text').textContent = `Это удалит категорию и ${count} операци${count===1?'ю':count<5?'и':'й'} навсегда. Восстановить нельзя.`;
-  document.getElementById('confirm-ok-btn').onclick = ()=>{
-    categories = categories.filter(c=>c.id!==catId);
-    operations = operations.filter(o=>o.category!==catId);
+window.confirmDeleteCat = function(catId){
+  const cat=categories.find(c=>c.id===catId);
+  const count=operations.filter(o=>o.category===catId).length;
+  document.getElementById('confirm-title').textContent=`Удалить «${cat.name}»?`;
+  document.getElementById('confirm-text').textContent=`Это удалит категорию и ${count} операци${count===1?'ю':count<5?'и':'й'} навсегда.`;
+  document.getElementById('confirm-ok-btn').onclick=()=>{
+    categories=categories.filter(c=>c.id!==catId);
+    operations=operations.filter(o=>o.category!==catId);
     save('cats',categories); save('ops',operations);
-    closeModal('overlay-confirm');
-    renderSettings();
-    renderHome();
+    closeModal('overlay-confirm'); renderSettings(); renderHome();
   };
   openModal('overlay-confirm');
-}
+};
 
 // ─── OVERLAY HELPERS ─────────────────────────────────────────────────────────
+window.openModal  = function(id){ document.getElementById(id).classList.add('open'); };
+window.closeModal = function(id){ document.getElementById(id).classList.remove('open'); };
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function closeOverlay(id,e){
-  if(e.target.id===id) closeModal(id);
-}
+window.closeOverlay = function(id,e){ if(e.target.id===id) closeModal(id); };
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-renderHome();
+// Приложение скрыто до входа — показывается через onAuthStateChanged
+document.getElementById('app').style.display = 'none';
 
-// ─── АВТО-ОБНОВЛЕНИЕ В 00:00 ПО ВЬЕТНАМУ ────────────────────────────────────
+// Авто-обновление в 00:00 по Вьетнаму
 function scheduleMidnightRefresh(){
   const now = getVNNow();
-  const msUntilMidnight = (
-    (24 - now.getHours()) * 3600 -
-    now.getMinutes() * 60 -
-    now.getSeconds()
-  ) * 1000;
-  setTimeout(()=>{
-    renderHome();
-    if(currentPage==='history') renderHistory();
-    if(currentPage==='reports') renderReports();
-    scheduleMidnightRefresh();
-  }, msUntilMidnight);
+  const ms = ((24-now.getHours())*3600 - now.getMinutes()*60 - now.getSeconds())*1000;
+  setTimeout(()=>{ renderAll(); scheduleMidnightRefresh(); }, ms);
 }
 scheduleMidnightRefresh();
 </script>
