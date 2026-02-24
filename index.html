@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Budget · VND</title>
@@ -33,7 +33,7 @@ body::before{content:'';position:fixed;top:-200px;right:-100px;width:400px;heigh
 #app{display:flex;flex-direction:column;min-height:100dvh;position:relative;z-index:1;overflow-x:hidden}
 .page{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;display:none;width:100%}
 .page.active{display:block}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(22,25,33,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;padding:8px 0 env(safe-area-inset-bottom,8px)}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(22,25,33,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:1000;padding:8px 0 env(safe-area-inset-bottom,8px);will-change:transform;-webkit-transform:translateX(-50%) translateZ(0);transform:translateX(-50%) translateZ(0)}
 nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--text3);font-family:'Sora',sans-serif;font-size:10px;font-weight:500;cursor:pointer;padding:6px 0;transition:.2s;letter-spacing:.3px}
 nav button svg{width:22px;height:22px;transition:.2s}
 nav button.active{color:var(--accent)}
