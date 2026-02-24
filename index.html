@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Budget · VND</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -23,12 +25,13 @@
   --radius:16px;
   --radius-sm:10px;
 }
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow-x:hidden}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow-x:hidden;overflow-y:scroll}
+body.modal-open{overflow:hidden;position:fixed;width:100%;}
 body::before{content:'';position:fixed;top:-200px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 70%);pointer-events:none;z-index:0}
 
 /* LAYOUT */
-#app{display:flex;flex-direction:column;min-height:100dvh;position:relative;z-index:1}
-.page{flex:1;overflow-y:auto;padding:0 0 90px;display:none}
+#app{display:flex;flex-direction:column;min-height:100dvh;position:relative;z-index:1;overflow-x:hidden}
+.page{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;display:none;width:100%}
 .page.active{display:block}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(22,25,33,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;padding:8px 0 env(safe-area-inset-bottom,8px)}
 nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--text3);font-family:'Sora',sans-serif;font-size:10px;font-weight:500;cursor:pointer;padding:6px 0;transition:.2s;letter-spacing:.3px}
@@ -60,8 +63,17 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .hero-sub-item .val.pos{color:var(--green)}
 .hero-sub-item .val.neg{color:var(--red)}
 
-.section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:24px 20px 10px}
-.quick-cats{display:flex;gap:10px;padding:0 20px;overflow-x:auto;scrollbar-width:none}
+.hero-extra{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 20px 0}
+.hero-extra-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+.hero-extra-card .lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+.hero-extra-card .val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px;color:var(--text)}
+.hero-extra-card .card-top{display:flex;align-items:center;justify-content:space-between}
+.hero-extra-btns{display:flex;gap:4px}
+.hero-extra-btn{width:22px;height:22px;border-radius:6px;border:none;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:.15s}
+.hero-extra-btn.plus{background:rgba(78,204,163,.2);color:var(--green)}
+.hero-extra-btn.minus{background:rgba(255,107,122,.15);color:var(--red)}
+.section-title{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:20px 20px 8px}
+.quick-cats{display:flex;gap:10px;padding:0 20px;overflow-x:auto;scrollbar-width:none;width:100%}
 .quick-cats::-webkit-scrollbar{display:none}
 .quick-cat{flex:0 0 auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.15s;font-size:13px;font-weight:500}
 .quick-cat:hover{border-color:var(--accent);background:var(--surface2)}
@@ -232,11 +244,10 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
   </div>
   <div class="form-group" style="width:100%;max-width:340px">
     <label class="form-label">Пароль</label>
-    <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"
-      onkeydown="if(event.key==='Enter')doLogin()"/>
+    <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"/>
   </div>
   <div class="login-error" id="login-error"></div>
-  <button class="btn btn-primary" style="width:100%;max-width:340px;margin-top:12px" onclick="doLogin()">Войти</button>
+  <button class="btn btn-primary" id="login-btn" style="width:100%;max-width:340px;margin-top:12px">Войти</button>
 </div>
 
 <div id="app">
@@ -261,9 +272,32 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
         </div>
       </div>
     </div>
+    <!-- extra info row -->
+    <div class="hero-extra">
+      <div class="hero-extra-card">
+        <div class="card-top">
+          <div class="lbl">ОСТАТОК USDT</div>
+          <div class="hero-extra-btns">
+            <button class="hero-extra-btn minus" onclick="openExtraModal('usdt','minus')">−</button>
+            <button class="hero-extra-btn plus" onclick="openExtraModal('usdt','plus')">+</button>
+          </div>
+        </div>
+        <div class="val" id="hero-usdt">0</div>
+      </div>
+      <div class="hero-extra-card">
+        <div class="card-top">
+          <div class="lbl">ОТЛОЖЕННЫЕ 10%</div>
+          <div class="hero-extra-btns">
+            <button class="hero-extra-btn minus" onclick="openExtraModal('savings','minus')">−</button>
+            <button class="hero-extra-btn plus" onclick="openExtraModal('savings','plus')">+</button>
+          </div>
+        </div>
+        <div class="val" id="hero-savings">0</div>
+      </div>
+    </div>
     <!-- quick categories -->
     <div class="section-title">КАТЕГОРИИ</div>
-    <div class="quick-cats" id="quick-cats"></div>
+    <div style="overflow:hidden;width:100%"><div class="quick-cats" id="quick-cats"></div></div>
     <!-- recent -->
     <div class="section-title">ПОСЛЕДНИЕ ОПЕРАЦИИ</div>
     <div class="recent-ops" id="recent-ops"></div>
@@ -452,6 +486,21 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
   </div>
 </div>
 
+<!-- MODAL: EXTRA CARD (USDT / SAVINGS) -->
+<div class="overlay" id="overlay-extra" onclick="closeOverlay('overlay-extra',event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="extra-modal-title">Добавить</div>
+    <div class="form-group">
+      <label class="form-label" id="extra-modal-label">Сумма</label>
+      <div class="amount-input-wrap">
+        <input class="form-input" id="extra-amount" type="text" inputmode="decimal" placeholder="0.00"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveExtraAmount()">Сохранить</button>
+  </div>
+</div>
+
 <!-- MODAL: CONFIRM DELETE -->
 <div class="overlay" id="overlay-confirm" onclick="closeOverlay('overlay-confirm',event)">
   <div class="modal">
@@ -500,6 +549,44 @@ const DEFAULT_CATS = [
 // localStorage cache helpers
 function lsLoad(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
 function lsSave(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+// Extra standalone values
+let extraUsdt    = lsLoad('extraUsdt', 0);
+let extraSavings = lsLoad('extraSavings', 0);
+let extraTarget  = null; // 'usdt' | 'savings'
+let extraMode    = null; // 'plus' | 'minus'
+
+window.openExtraModal = function(target, mode){
+  extraTarget = target;
+  extraMode   = mode;
+  const isUsdt = target === 'usdt';
+  const label  = isUsdt ? 'ОСТАТОК USDT' : 'ОТЛОЖЕННЫЕ 10%';
+  document.getElementById('extra-modal-title').textContent = (mode==='plus'?'Пополнить: ':'Вычесть: ') + label;
+  document.getElementById('extra-modal-label').textContent = mode==='plus'?'Прибавить сумму':'Вычесть сумму';
+  document.getElementById('extra-amount').value = '';
+  openModal('overlay-extra');
+};
+
+window.saveExtraAmount = function(){
+  const raw = parseFloat(document.getElementById('extra-amount').value.replace(',','.'));
+  if(!raw || isNaN(raw)){ alert('Введите сумму'); return; }
+  if(extraTarget === 'usdt'){
+    extraUsdt = extraMode==='plus' ? extraUsdt+raw : extraUsdt-raw;
+    lsSave('extraUsdt', extraUsdt);
+  } else {
+    extraSavings = extraMode==='plus' ? extraSavings+raw : extraSavings-raw;
+    lsSave('extraSavings', extraSavings);
+  }
+  closeModal('overlay-extra');
+  renderExtraCards();
+};
+
+function renderExtraCards(){
+  const uEl = document.getElementById('hero-usdt');
+  const sEl = document.getElementById('hero-savings');
+  if(uEl) uEl.textContent = '$ ' + extraUsdt.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(sEl) sEl.textContent = '$ ' + extraSavings.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
 let operations   = lsLoad('ops',[]);
 let categories   = lsLoad('cats',DEFAULT_CATS);
@@ -728,6 +815,7 @@ function renderHome(){
   const ro = document.getElementById('recent-ops');
   if(!recent.length){ ro.innerHTML='<div class="empty"><p>Операций пока нет</p></div>'; return; }
   ro.innerHTML = recent.map(o=>opCardHTML(o)).join('');
+  renderExtraCards();
 }
 
 function opCardHTML(o){
@@ -1204,13 +1292,17 @@ window.confirmDeleteCat = function(catId){
 };
 
 // ─── OVERLAY HELPERS ─────────────────────────────────────────────────────────
-window.openModal  = function(id){ document.getElementById(id).classList.add('open'); };
-window.closeModal = function(id){ document.getElementById(id).classList.remove('open'); };
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+window.openModal  = function(id){ document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); };
+window.closeModal = function(id){ document.getElementById(id).classList.remove('open'); document.body.classList.remove('modal-open'); };
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.classList.remove('modal-open'); }
 window.closeOverlay = function(id,e){ if(e.target.id===id) closeModal(id); };
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
+// Привязываем кнопку входа и Enter внутри модуля
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
 // Приложение скрыто до входа — показывается через onAuthStateChanged
 document.getElementById('app').style.display = 'none';
 
