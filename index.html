@@ -34,7 +34,7 @@ body::before{content:'';position:fixed;top:-200px;right:-100px;width:400px;heigh
 .page{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;display:none;width:100%}
 .page.active{display:block}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(22,25,33,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:1000;padding:8px 0 env(safe-area-inset-bottom,8px);will-change:transform;-webkit-transform:translateX(-50%) translateZ(0);transform:translateX(-50%) translateZ(0)}
-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--text3);font-family:'Sora',sans-serif;font-size:10px;font-weight:500;cursor:pointer;padding:6px 0;transition:.2s;letter-spacing:.3px}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--text3);font-family:'Sora',sans-serif;font-size:10px;font-weight:500;cursor:pointer;padding:6px 0;transition:color .1s;letter-spacing:.3px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 nav button svg{width:22px;height:22px;transition:.2s}
 nav button.active{color:var(--accent)}
 nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
@@ -370,22 +370,22 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 
   <!-- NAV -->
   <nav>
-    <button class="active" onclick="goTo('home')">
+    <button class="active" data-page="home" onclick="goTo('home')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Главная
     </button>
-    <button onclick="goTo('history')">
+    <button data-page="history" onclick="goTo('history')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       История
     </button>
     <button onclick="openAddOpModal()" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:4px 0">
       <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;box-shadow:0 4px 16px rgba(245,166,35,.45);margin-bottom:2px;margin-top:-10px">+</div>
     </button>
-    <button onclick="goTo('reports')">
+    <button data-page="reports" onclick="goTo('reports')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Отчёты
     </button>
-    <button onclick="goTo('settings')">
+    <button data-page="settings" onclick="goTo('settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Настройки
     </button>
@@ -612,6 +612,8 @@ async function loadFromCloud(){
       if(d.categories)   categories   = d.categories;
       if(d.weeklyBudget !== undefined) weeklyBudget = d.weeklyBudget;
       if(d.weekStartDay !== undefined) weekStartDay = d.weekStartDay;
+      if(d.extraUsdt    !== undefined) extraUsdt    = d.extraUsdt;
+      if(d.extraSavings !== undefined) extraSavings = d.extraSavings;
       // update local cache
       lsSave('ops', operations);
       lsSave('cats', categories);
@@ -629,7 +631,7 @@ function saveToCloud(){
     showSync(true);
     try{
       const ref = doc(db, 'users', currentUser.uid, 'appdata', 'main');
-      await setDoc(ref, { operations, categories, weeklyBudget, weekStartDay });
+      await setDoc(ref, { operations, categories, weeklyBudget, weekStartDay, extraUsdt, extraSavings });
       // update local cache
       lsSave('ops', operations);
       lsSave('cats', categories);
@@ -771,8 +773,8 @@ window.goTo = function(page){
   currentPage = page;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('nav button').forEach((b,i)=>{
-    b.classList.toggle('active', ['home','history','reports','settings'][i]===page);
+  document.querySelectorAll('nav button[data-page]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.page===page);
   });
   if(page==='home')     renderHome();
   if(page==='history')  renderHistory();
