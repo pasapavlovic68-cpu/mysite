@@ -308,9 +308,8 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
       <h1>История</h1>
     </div>
     <div style="padding:0 20px 10px;display:flex;gap:6px;justify-content:flex-end">
-      <button class="period-btn active" data-period="week" onclick="setHistPeriod('week')">Неделя</button>
-      <button class="period-btn" data-period="month" onclick="setHistPeriod('month')">Месяц</button>
-      <button class="period-btn" data-period="all" onclick="setHistPeriod('all')">Всё</button>
+      <button class="period-btn active" data-period="week" onclick="setHistPeriod('week')">По неделям</button>
+      <button class="period-btn" data-period="month" onclick="setHistPeriod('month')">По месяцам</button>
     </div>
     <div id="history-container" style="padding:0 20px"></div>
   </div>
@@ -320,9 +319,8 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
       <h1>Отчёты</h1>
     </div>
     <div style="padding:0 20px 10px;display:flex;gap:6px;justify-content:flex-end">
-      <button class="period-btn active" data-period="week" onclick="setRepPeriod('week')">Неделя</button>
-      <button class="period-btn" data-period="month" onclick="setRepPeriod('month')">Месяц</button>
-      <button class="period-btn" data-period="all" onclick="setRepPeriod('all')">Всё</button>
+      <button class="period-btn active" data-period="week" onclick="setRepPeriod('week')">По неделям</button>
+      <button class="period-btn" data-period="month" onclick="setRepPeriod('month')">По месяцам</button>
     </div>
     <div id="reports-container" style="padding:0 20px"></div>
   </div>
@@ -884,12 +882,13 @@ window.setHistPeriod = function(p){
 };
 
 function renderHistory(){
-  const filtered = operations.filter(o=>inPeriod(o,histPeriod));
+  // Показываем ВСЕ данные — 'week' и 'month' означают только группировку, не фильтр
+  const filtered = operations.slice(); // все операции
   const container = document.getElementById('history-container');
   if(!filtered.length){ container.innerHTML='<div class="empty"><p>Нет операций за период</p></div>'; return; }
   const byDay={};
   filtered.forEach(o=>{ if(!byDay[o.date])byDay[o.date]=[]; byDay[o.date].push(o); });
-  if(histPeriod==='week') container.innerHTML = renderWeekGroups(byDay, true);
+  if(histPeriod==='week' || histPeriod==='all') container.innerHTML = renderWeekGroups(byDay, false);
   else container.innerHTML = renderMonthGroups(byDay);
 }
 
@@ -1032,18 +1031,38 @@ function catBarsHTML(ops){
 }
 
 function renderReports(){
-  const filtered = operations.filter(o=>inPeriod(o,repPeriod));
+  // Показываем ВСЕ данные — группировка по неделям или месяцам
+  const filtered = operations.slice();
   const totalExp = filtered.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
   const totalInc = filtered.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
   let html=`<div class="report-summary">
     <div class="summary-card"><div class="s-label">РАСХОДЫ</div><div class="s-val red">${fmtVND(totalExp)} ₫</div></div>
     <div class="summary-card"><div class="s-label">ДОХОДЫ</div><div class="s-val green">${fmtVND(totalInc)} ₫</div></div>
   </div>`;
-  if(!filtered.length){ html+='<div class="empty"><p>Нет операций за период</p></div>'; document.getElementById('reports-container').innerHTML=html; return; }
-  if(repPeriod==='week'){
-    const dates=filtered.map(o=>o.date).sort();
-    html+=`<div class="report-bar"><div class="report-bar-title">${weekRangeLabel(getWeekKeyForDs(dates[0]))}</div>${catBarsHTML(filtered)}</div>`;
+  if(!filtered.length){ html+='<div class="empty"><p>Нет операций</p></div>'; document.getElementById('reports-container').innerHTML=html; return; }
+  if(repPeriod==='week' || repPeriod==='all'){
+    // сгруппировать по неделям
+    const weekMap={};
+    filtered.forEach(o=>{ const wk=getWeekKeyForDs(o.date); if(!weekMap[wk])weekMap[wk]=[]; weekMap[wk].push(o); });
+    html+=Object.keys(weekMap).sort((a,b)=>b.localeCompare(a)).map(wk=>{
+      const key='rep_wk_'+wk; const isOpen=openRepGroups.has(key);
+      const wops=weekMap[wk];
+      const wexp=wops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+      const winc=wops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+      return `<div class="coll-group">
+        <div class="coll-header ${isOpen?'open':''}" onclick="toggleRepGroup('${key}')">
+          <span class="coll-period">${weekRangeLabel(wk)}</span>
+          <div class="coll-stats">
+            ${wexp?`<span class="coll-exp">−${fmtVND(wexp)}</span>`:''}
+            ${winc?`<span class="coll-inc">+${fmtVND(winc)}</span>`:''}
+            <span class="coll-chevron">›</span>
+          </div>
+        </div>
+        ${isOpen?`<div class="coll-body" style="padding:12px 16px"><div class="report-bar" style="margin:0;padding:0;border:none;background:none">${catBarsHTML(wops)}</div></div>`:''}
+      </div>`;
+    }).join('');
   } else {
+    // сгруппировать по месяцам
     const monthMap={};
     filtered.forEach(o=>{ const mk=o.date.slice(0,7); if(!monthMap[mk])monthMap[mk]=[]; monthMap[mk].push(o); });
     html+=Object.keys(monthMap).sort((a,b)=>b.localeCompare(a)).map(mk=>{
@@ -1059,7 +1078,7 @@ function renderReports(){
           <div class="coll-stats">${mexp?`<span class="coll-exp">−${fmtVND(mexp)}</span>`:''} ${minc?`<span class="coll-inc">+${fmtVND(minc)}</span>`:''}<span class="coll-chevron">›</span></div>
         </div>
         ${isOpen?`<div class="coll-body">${Object.keys(weekMap2).sort((a,b)=>b.localeCompare(a)).map(wk=>{
-          const key2='rep_wk_'+wk; const isOpen2=openRepGroups.has(key2);
+          const key2='rep_wk2_'+wk; const isOpen2=openRepGroups.has(key2);
           const wops=weekMap2[wk];
           const wexp=wops.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
           const winc=wops.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
