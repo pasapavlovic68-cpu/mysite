@@ -577,6 +577,7 @@ window.saveExtraAmount = function(){
     extraSavings = extraMode==='plus' ? extraSavings+raw : extraSavings-raw;
     lsSave('extraSavings', extraSavings);
   }
+  saveToCloud();
   closeModal('overlay-extra');
   renderExtraCards();
 };
