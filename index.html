@@ -69,6 +69,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .cashflow-card .val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px}
 .cashflow-card .val.pos{color:var(--green)}
 .cashflow-card .val.neg{color:var(--red)}
+.hero-extra{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 20px 0;width:calc(100% - 40px)}
 .hero-extra-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
 .hero-extra-card .lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
 .hero-extra-card .val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px;color:var(--text)}
@@ -136,9 +137,9 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .cat-del:hover{color:var(--red);background:rgba(255,107,122,.1)}
  
 /* MODALS */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:.25s}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:.25s;touch-action:none}
 .overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;padding:24px 20px calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateY(100%);transition:.3s cubic-bezier(.32,1,.35,1);max-height:90dvh;overflow-y:auto}
+.modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;padding:24px 20px calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateY(100%);transition:.3s cubic-bezier(.32,1,.35,1);max-height:90dvh;overflow-y:auto;overflow-x:hidden;touch-action:pan-y}
 .overlay.open .modal{transform:translateY(0)}
 .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:20px;letter-spacing:-.2px}
@@ -777,9 +778,10 @@ function calcBudget(){
   const todayStr = dateStr();
   const spentToday = operations.filter(o=>o.type==='expense'&&o.date===todayStr).reduce((s,o)=>s+o.amount,0);
   const spentWeek  = operations.filter(o=>o.type==='expense'&&inPeriod(o,'week')).reduce((s,o)=>s+o.amount,0);
+  const spentBeforeToday = spentWeek - spentToday;
   const remWeek  = weeklyBudget - spentWeek;
   const daysLeft = daysLeftInWeek();
-  const daily    = daysLeft > 0 ? remWeek / daysLeft : 0;
+  const daily    = daysLeft > 0 ? (weeklyBudget - spentBeforeToday) / daysLeft : 0;
   return { daily, remToday: daily - spentToday, remWeek, spentToday, spentWeek };
 }
  
