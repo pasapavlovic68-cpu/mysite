@@ -28,7 +28,7 @@
 body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow-x:hidden;overflow-y:scroll}
 body.modal-open{overflow:hidden;position:fixed;width:100%;}
 body::before{content:'';position:fixed;top:-200px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 70%);pointer-events:none;z-index:0}
-
+ 
 /* LAYOUT */
 #app{display:flex;flex-direction:column;min-height:100dvh;position:relative;z-index:1;overflow-x:hidden}
 .page{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;display:none;width:100%}
@@ -38,17 +38,17 @@ nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
 nav button svg{width:22px;height:22px;transition:.2s}
 nav button.active{color:var(--accent)}
 nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
-
+ 
 /* FAB */
 .fab{position:fixed;bottom:74px;right:max(16px, calc(50% - 199px));z-index:101;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 24px rgba(245,166,35,.4);transition:.2s;display:flex;align-items:center;justify-content:center}
 .fab:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(245,166,35,.5)}
 .fab:active{transform:scale(.95)}
-
+ 
 /* HEADER */
 .page-header{padding:52px 20px 20px;position:sticky;top:0;background:var(--bg);z-index:10}
 .page-header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .page-header p{color:var(--text2);font-size:13px;margin-top:2px}
-
+ 
 /* HOME */
 .home-hero{margin:16px 20px 0;background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:24px;padding:28px 24px;position:relative;overflow:hidden}
 .home-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:150px;height:150px;background:radial-gradient(circle,rgba(245,166,35,.12),transparent 70%)}
@@ -62,8 +62,13 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .hero-sub-item .val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:3px}
 .hero-sub-item .val.pos{color:var(--green)}
 .hero-sub-item .val.neg{color:var(--red)}
-
-.hero-extra{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 20px 0}
+ 
+.cashflow-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 20px 16px}
+.cashflow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+.cashflow-card .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3)}
+.cashflow-card .val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px}
+.cashflow-card .val.pos{color:var(--green)}
+.cashflow-card .val.neg{color:var(--red)}
 .hero-extra-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
 .hero-extra-card .lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
 .hero-extra-card .val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;margin-top:4px;color:var(--text)}
@@ -78,7 +83,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .quick-cat{flex:0 0 auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.15s;font-size:13px;font-weight:500}
 .quick-cat:hover{border-color:var(--accent);background:var(--surface2)}
 .quick-cat .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-
+ 
 .recent-ops{padding:0 20px;display:flex;flex-direction:column;gap:8px}
 .op-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
 .op-card:hover{border-color:var(--border);background:var(--surface2)}
@@ -89,12 +94,12 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .op-amount{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;flex-shrink:0}
 .op-amount.expense{color:var(--red)}
 .op-amount.income{color:var(--green)}
-
+ 
 /* HISTORY */
 .history-group{padding:0 20px;margin-bottom:4px}
 .history-date{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:20px 0 8px;display:flex;justify-content:space-between;align-items:center}
 .history-date .date-total{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500}
-
+ 
 /* REPORTS */
 .report-section{padding:0 20px;margin-bottom:20px}
 .report-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
@@ -105,14 +110,14 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .bar-label .cat-val{font-family:'JetBrains Mono',monospace;color:var(--text2)}
 .bar-track{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
-
+ 
 .report-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px}
 .summary-card .s-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
 .summary-card .s-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;margin-top:6px}
 .summary-card .s-val.red{color:var(--red)}
 .summary-card .s-val.green{color:var(--green)}
-
+ 
 /* SETTINGS */
 .settings-section{padding:0 20px;margin-bottom:24px}
 .settings-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
@@ -122,14 +127,14 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .settings-row .row-label{font-size:14px;font-weight:500}
 .settings-row .row-sub{font-size:11px;color:var(--text3);margin-top:2px}
 .settings-row .row-val{font-size:13px;color:var(--accent);font-family:'JetBrains Mono',monospace;flex-shrink:0}
-
+ 
 .cats-list{display:flex;flex-direction:column;gap:8px}
 .cat-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:12px}
 .cat-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
 .cat-name-text{flex:1;font-size:14px;font-weight:500}
 .cat-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:6px;transition:.15s;display:flex}
 .cat-del:hover{color:var(--red);background:rgba(255,107,122,.1)}
-
+ 
 /* MODALS */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:.25s}
 .overlay.open{opacity:1;pointer-events:all}
@@ -137,7 +142,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .overlay.open .modal{transform:translateY(0)}
 .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:20px;letter-spacing:-.2px}
-
+ 
 /* FORM */
 .form-group{margin-bottom:16px}
 .form-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:block}
@@ -149,45 +154,45 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .amount-suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .suggestion{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;cursor:pointer;color:var(--text2);transition:.15s}
 .suggestion:hover{border-color:var(--accent);color:var(--accent)}
-
+ 
 .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .type-btn{padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
 .type-btn.active.expense{background:rgba(255,107,122,.15);border-color:var(--red);color:var(--red)}
 .type-btn.active.income{background:rgba(78,204,163,.15);border-color:var(--green);color:var(--green)}
-
+ 
 .cats-picker{display:flex;flex-wrap:wrap;gap:8px}
 .cat-pick{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:12px;font-weight:500;transition:.15s}
 .cat-pick.selected{border-color:var(--accent);background:rgba(245,166,35,.1);color:var(--accent)}
 .cat-pick .dot{width:8px;height:8px;border-radius:50%}
-
+ 
 .btn{width:100%;padding:14px;border-radius:var(--radius-sm);border:none;font-family:'Sora',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;letter-spacing:.2px}
 .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(245,166,35,.3)}
 .btn-primary:hover{box-shadow:0 6px 28px rgba(245,166,35,.4)}
 .btn-primary:active{transform:scale(.98)}
 .btn-danger{background:rgba(255,107,122,.15);color:var(--red);border:1px solid rgba(255,107,122,.3)}
 .btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);margin-top:8px}
-
+ 
 .color-picker{display:flex;gap:8px;flex-wrap:wrap}
 .color-opt{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s}
 .color-opt.selected{border-color:var(--text)}
-
+ 
 .emoji-wrap{position:relative;display:inline-flex}
 .emoji-del-x{position:absolute;top:-6px;right:-6px;width:16px;height:16px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;cursor:pointer;font-weight:700;line-height:1;z-index:5;border:1.5px solid var(--bg)}
-
+ 
 .week-day-picker{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .wd-btn{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:.15s;text-align:center}
 .wd-btn.active{background:rgba(245,166,35,.15);border-color:var(--accent);color:var(--accent)}
-
+ 
 .budget-period{display:flex;justify-content:flex-end;gap:6px;padding:0 20px 0}
 .period-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text3);cursor:pointer;transition:.15s;font-family:'Sora',sans-serif}
 .period-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
-
+ 
 .empty{text-align:center;padding:60px 20px;color:var(--text3)}
 .empty svg{width:48px;height:48px;opacity:.3;margin-bottom:12px}
 .empty p{font-size:14px}
-
+ 
 .confirm-btns{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-
+ 
 /* COLLAPSIBLE GROUPS */
 .coll-group{margin-bottom:8px}
 .coll-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:.15s;gap:10px}
@@ -213,14 +218,14 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 .cat-type-btn{padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
 .cat-type-btn.active.expense{background:rgba(255,107,122,.15);border-color:var(--red);color:var(--red)}
 .cat-type-btn.active.income{background:rgba(78,204,163,.15);border-color:var(--green);color:var(--green)}
-
+ 
 /* LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;max-width:430px;margin:0 auto}
 #login-screen h1{font-size:28px;font-weight:700;margin-bottom:6px;letter-spacing:-.5px}
 #login-screen p{color:var(--text2);font-size:13px;margin-bottom:36px;text-align:center;line-height:1.6}
 #login-screen .logo{font-size:48px;margin-bottom:20px}
 .login-error{color:var(--red);font-size:12px;margin-top:8px;min-height:16px;text-align:center}
-
+ 
 /* SYNC INDICATOR */
 #sync-indicator{position:fixed;top:env(safe-area-inset-top,0px);right:0;left:0;max-width:430px;margin:0 auto;z-index:500;pointer-events:none}
 .sync-badge{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:0 0 10px 10px;padding:6px 14px;font-size:11px;color:var(--text3);width:fit-content;margin:0 auto;opacity:0;transition:.3s;font-weight:500}
@@ -232,7 +237,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
 <body>
 <!-- SYNC INDICATOR -->
 <div id="sync-indicator"><div class="sync-badge" id="sync-badge"><span class="sync-dot"></span> Синхронизация...</div></div>
-
+ 
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="logo">💰</div>
@@ -249,13 +254,24 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
   <div class="login-error" id="login-error"></div>
   <button class="btn btn-primary" id="login-btn" style="width:100%;max-width:340px;margin-top:12px">Войти</button>
 </div>
-
+ 
 <div id="app">
   <!-- PAGES -->
   <div class="page active" id="page-home">
     <div class="page-header">
       <h1 id="greeting">Привет 👋</h1>
       <p id="today-date"></p>
+    </div>
+    <!-- cashflow summary -->
+    <div class="cashflow-row">
+      <div class="cashflow-card">
+        <div class="lbl">ДОХОД</div>
+        <div class="val pos" id="cf-income">0 ₫</div>
+      </div>
+      <div class="cashflow-card">
+        <div class="lbl">РАСХОД</div>
+        <div class="val neg" id="cf-expense">0 ₫</div>
+      </div>
     </div>
     <!-- hero -->
     <div class="home-hero">
@@ -302,7 +318,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     <div class="section-title">ПОСЛЕДНИЕ ОПЕРАЦИИ</div>
     <div class="recent-ops" id="recent-ops"></div>
   </div>
-
+ 
   <div class="page" id="page-history">
     <div class="page-header" style="padding-bottom:12px">
       <h1>История</h1>
@@ -313,7 +329,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     </div>
     <div id="history-container" style="padding:0 20px"></div>
   </div>
-
+ 
   <div class="page" id="page-reports">
     <div class="page-header" style="padding-bottom:12px">
       <h1>Отчёты</h1>
@@ -324,7 +340,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     </div>
     <div id="reports-container" style="padding:0 20px"></div>
   </div>
-
+ 
   <div class="page" id="page-settings">
     <div class="page-header"><h1>Настройки</h1></div>
     <div class="settings-section">
@@ -365,7 +381,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
       </div>
     </div>
   </div>
-
+ 
   <!-- NAV -->
   <nav>
     <button class="active" data-page="home" onclick="goTo('home')">
@@ -389,7 +405,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     </button>
   </nav>
 </div>
-
+ 
 <!-- MODAL: ADD/EDIT OPERATION -->
 <div class="overlay" id="overlay-op" onclick="closeOverlay('overlay-op',event)">
   <div class="modal">
@@ -426,7 +442,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     <button class="btn btn-ghost" id="op-del-btn" onclick="deleteCurrentOp()" style="display:none">Удалить операцию</button>
   </div>
 </div>
-
+ 
 <!-- MODAL: BUDGET -->
 <div class="overlay" id="overlay-budget" onclick="closeOverlay('overlay-budget',event)">
   <div class="modal">
@@ -442,7 +458,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     <button class="btn btn-primary" onclick="saveBudget()">Сохранить</button>
   </div>
 </div>
-
+ 
 <!-- MODAL: WEEKDAY -->
 <div class="overlay" id="overlay-weekday" onclick="closeOverlay('overlay-weekday',event)">
   <div class="modal">
@@ -454,7 +470,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     <button class="btn btn-primary" onclick="saveWeekday()">Сохранить</button>
   </div>
 </div>
-
+ 
 <!-- MODAL: ADD CATEGORY -->
 <div class="overlay" id="overlay-cat" onclick="closeOverlay('overlay-cat',event)">
   <div class="modal">
@@ -485,7 +501,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     <button class="btn btn-primary" onclick="saveCategory()">Добавить</button>
   </div>
 </div>
-
+ 
 <!-- MODAL: EXTRA CARD (USDT / SAVINGS) -->
 <div class="overlay" id="overlay-extra" onclick="closeOverlay('overlay-extra',event)">
   <div class="modal">
@@ -500,7 +516,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     <button class="btn btn-primary" onclick="saveExtraAmount()">Сохранить</button>
   </div>
 </div>
-
+ 
 <!-- MODAL: CONFIRM DELETE -->
 <div class="overlay" id="overlay-confirm" onclick="closeOverlay('overlay-confirm',event)">
   <div class="modal">
@@ -513,7 +529,7 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(245,166,35,.5))}
     </div>
   </div>
 </div>
-
+ 
 <script type="module">
 // ─── FIREBASE ────────────────────────────────────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
@@ -521,7 +537,7 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc }
   from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-
+ 
 const firebaseConfig = {
   apiKey: "AIzaSyDW6_nCv0uj4uhQ6WBNc0hOwyMlR3MnhrE",
   authDomain: "flowpay-7460e.firebaseapp.com",
@@ -533,29 +549,29 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
-
+ 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const COLORS = ['#f5a623','#e8845a','#ff6b7a','#4ecca3','#5b8dee','#a78bfa','#f472b6','#34d399','#fb923c','#818cf8'];
 const ICONS  = ['🍜','🍕','🍺','☕','🚗','🚌','🏠','💊','🛍️','🎬','💡','📱','✈️','🎮','🐶','📚','💪','🎵','🏋️','💰'];
 const DAYS   = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-
+ 
 const DEFAULT_CATS = [
   {id:'c1',name:'Еда',color:'#f5a623',icon:'🍜',type:'expense'},
   {id:'c2',name:'Транспорт',color:'#5b8dee',icon:'🚗',type:'expense'},
   {id:'c3',name:'Развлечения',color:'#a78bfa',icon:'🎬',type:'expense'},
   {id:'c4',name:'Здоровье',color:'#4ecca3',icon:'💊',type:'expense'},
 ];
-
+ 
 // localStorage cache helpers
 function lsLoad(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
 function lsSave(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
-
+ 
 // Extra standalone values
 let extraUsdt    = lsLoad('extraUsdt', 0);
 let extraSavings = lsLoad('extraSavings', 0);
 let extraTarget  = null; // 'usdt' | 'savings'
 let extraMode    = null; // 'plus' | 'minus'
-
+ 
 window.openExtraModal = function(target, mode){
   extraTarget = target;
   extraMode   = mode;
@@ -566,7 +582,7 @@ window.openExtraModal = function(target, mode){
   document.getElementById('extra-amount').value = '';
   openModal('overlay-extra');
 };
-
+ 
 window.saveExtraAmount = function(){
   const raw = parseFloat(document.getElementById('extra-amount').value.replace(',','.'));
   if(!raw || isNaN(raw)){ alert('Введите сумму'); return; }
@@ -581,14 +597,14 @@ window.saveExtraAmount = function(){
   closeModal('overlay-extra');
   renderExtraCards();
 };
-
+ 
 function renderExtraCards(){
   const uEl = document.getElementById('hero-usdt');
   const sEl = document.getElementById('hero-savings');
   if(uEl) uEl.textContent = '$ ' + extraUsdt.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
   if(sEl) sEl.textContent = '$ ' + extraSavings.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
-
+ 
 let operations   = lsLoad('ops',[]);
 let categories   = lsLoad('cats',DEFAULT_CATS);
 let weeklyBudget = lsLoad('budget',0);
@@ -598,7 +614,7 @@ let repPeriod    = 'week';
 let currentPage  = 'home';
 let currentUser  = null;
 let syncTimer    = null;
-
+ 
 // ─── FIRESTORE SYNC ──────────────────────────────────────────────────────────
 async function loadFromCloud(){
   if(!currentUser) return;
@@ -622,7 +638,7 @@ async function loadFromCloud(){
     renderAll();
   } catch(e){ console.warn('Cloud load error:', e); }
 }
-
+ 
 function saveToCloud(){
   if(!currentUser) return;
   clearTimeout(syncTimer);
@@ -640,12 +656,12 @@ function saveToCloud(){
     showSync(false);
   }, 1500);
 }
-
+ 
 function showSync(on){
   const b = document.getElementById('sync-badge');
   b.classList.toggle('show', on);
 }
-
+ 
 function save(k,v){
   if(k==='ops')         operations   = v;
   if(k==='cats')        categories   = v;
@@ -653,7 +669,7 @@ function save(k,v){
   if(k==='weekStart')   weekStartDay = v;
   saveToCloud();
 }
-
+ 
 // ─── AUTH ────────────────────────────────────────────────────────────────────
 window.doLogin = async function(){
   const email = document.getElementById('login-email').value.trim();
@@ -673,11 +689,11 @@ window.doLogin = async function(){
     errEl.textContent = msgs[e.code] || 'Ошибка входа: '+e.message;
   }
 };
-
+ 
 window.doLogout = async function(){
   await signOut(auth);
 };
-
+ 
 onAuthStateChanged(auth, async user => {
   currentUser = user;
   const loginScreen = document.getElementById('login-screen');
@@ -693,7 +709,7 @@ onAuthStateChanged(auth, async user => {
     appEl.style.display = 'none';
   }
 });
-
+ 
 // ─── FORMAT ──────────────────────────────────────────────────────────────────
 function fmtVND(n){
   if(n==null||isNaN(n))return '0';
@@ -718,7 +734,7 @@ window.applySuggestion = function(val){
   document.getElementById('op-amount').value = fmtVND(val);
   renderSuggestions(val);
 };
-
+ 
 // ─── DATES ───────────────────────────────────────────────────────────────────
 function getVNNow(){
   return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
@@ -749,7 +765,7 @@ function inPeriod(op, period){
   }
   return true;
 }
-
+ 
 // ─── BUDGET CALC ─────────────────────────────────────────────────────────────
 function daysLeftInWeek(){
   const now = getVNNow();
@@ -766,7 +782,7 @@ function calcBudget(){
   const daily    = daysLeft > 0 ? remWeek / daysLeft : 0;
   return { daily, remToday: daily - spentToday, remWeek, spentToday, spentWeek };
 }
-
+ 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 window.goTo = function(page){
   currentPage = page;
@@ -780,47 +796,55 @@ window.goTo = function(page){
   if(page==='reports')  renderReports();
   if(page==='settings') renderSettings();
 };
-
+ 
 function renderAll(){
   renderHome();
   if(currentPage==='history')  renderHistory();
   if(currentPage==='reports')  renderReports();
   if(currentPage==='settings') renderSettings();
 }
-
+ 
 // ─── RENDER HOME ─────────────────────────────────────────────────────────────
 function renderHome(){
   const h = getVNNow().getHours();
   const greet = h<12?'Доброе утро ☀️':h<17?'Добрый день 👋':'Добрый вечер 🌙';
   document.getElementById('greeting').textContent = greet;
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
-
+ 
   const {daily, remToday, remWeek} = calcBudget();
   const heroEl = document.getElementById('hero-today');
   heroEl.textContent = fmtVND(Math.abs(remToday)) + ' ₫';
   heroEl.className = 'hero-amount ' + (remToday>=0?'positive':'negative');
   if(remToday<0) heroEl.textContent = '−' + heroEl.textContent;
-
+ 
   const wEl = document.getElementById('hero-week');
   wEl.textContent = fmtVND(Math.abs(remWeek)) + ' ₫';
   wEl.className = 'val ' + (remWeek>=0?'pos':'neg');
   if(remWeek<0) wEl.textContent = '−' + wEl.textContent;
-
+ 
   document.getElementById('hero-daily').textContent = fmtVND(daily) + ' ₫';
-
+ 
   const usageCount = {};
   operations.forEach(o=>{ usageCount[o.category]=(usageCount[o.category]||0)+1; });
   const sortedCats = [...categories].sort((a,b)=>(usageCount[b.id]||0)-(usageCount[a.id]||0));
   document.getElementById('quick-cats').innerHTML = sortedCats.map(c=>`
     <div class="quick-cat" onclick="openAddOpModal(null,'${c.id}')"><span>${c.icon}</span><span>${c.name}</span></div>`).join('');
-
+ 
   const recent = [...operations].sort((a,b)=>b.id.localeCompare(a.id)).slice(0,5);
   const ro = document.getElementById('recent-ops');
   if(!recent.length){ ro.innerHTML='<div class="empty"><p>Операций пока нет</p></div>'; return; }
   ro.innerHTML = recent.map(o=>opCardHTML(o)).join('');
   renderExtraCards();
+ 
+  // cashflow totals
+  const totalIncome  = operations.filter(o=>o.type==='income').reduce((s,o)=>s+o.amount,0);
+  const totalExpense = operations.filter(o=>o.type==='expense').reduce((s,o)=>s+o.amount,0);
+  const cfInc = document.getElementById('cf-income');
+  const cfExp = document.getElementById('cf-expense');
+  if(cfInc) cfInc.textContent = fmtVND(totalIncome) + ' ₫';
+  if(cfExp) cfExp.textContent = fmtVND(totalExpense) + ' ₫';
 }
-
+ 
 function opCardHTML(o){
   const cat = categories.find(c=>c.id===o.category)||{name:'Без категории',icon:'📁',color:'#666'};
   const sign = o.type==='expense'?'−':'+';
@@ -833,7 +857,7 @@ function opCardHTML(o){
     <div class="op-amount ${o.type}">${sign}${fmtVND(o.amount)} ₫</div>
   </div>`;
 }
-
+ 
 function formatDate(d){
   const today = dateStr();
   const yest  = dateStr(getVNNow());
@@ -843,10 +867,10 @@ function formatDate(d){
   if(d===yesterdayStr) return 'Вчера';
   return new Date(d+'T00:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 }
-
+ 
 // ─── HISTORY ─────────────────────────────────────────────────────────────────
 let openHistGroups = new Set();
-
+ 
 function fmtShort(ds){
   const d = new Date(ds+'T00:00:00');
   return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
@@ -871,7 +895,7 @@ function weekRangeLabel(startDs){
   const ed = new Date(endDs+'T00:00:00');
   return `${DAYS[sd.getDay()]} ${fmtShort(startDs)} — ${DAYS[ed.getDay()]} ${fmtShort(endDs)}`;
 }
-
+ 
 window.toggleHistGroup = function(key){
   if(openHistGroups.has(key)) openHistGroups.delete(key); else openHistGroups.add(key);
   renderHistory();
@@ -881,7 +905,7 @@ window.setHistPeriod = function(p){
   document.querySelectorAll('#page-history .period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));
   renderHistory();
 };
-
+ 
 function renderHistory(){
   // Показываем ВСЕ данные — 'week' и 'month' означают только группировку, не фильтр
   const filtered = operations.slice(); // все операции
@@ -892,7 +916,7 @@ function renderHistory(){
   if(histPeriod==='week' || histPeriod==='all') container.innerHTML = renderWeekGroups(byDay, false);
   else container.innerHTML = renderMonthGroups(byDay);
 }
-
+ 
 function dayBlock_inner(date,ops){
   const key='day_'+date;
   const isOpen=openHistGroups.has(key);
@@ -909,7 +933,7 @@ function dayBlock_inner(date,ops){
     ${isOpen?`<div class="coll-day-body">${ops.sort((a,b)=>b.id.localeCompare(a.id)).map(o=>opCardHTML(o)).join('')}</div>`:''}
   </div>`;
 }
-
+ 
 function renderWeekGroups(byDay, singleWeek){
   const weekMap={};
   Object.keys(byDay).forEach(ds=>{
@@ -942,7 +966,7 @@ function renderWeekGroups(byDay, singleWeek){
     </div>`;
   }).join('');
 }
-
+ 
 function renderMonthGroups(byDay){
   const monthMap={};
   Object.keys(byDay).forEach(ds=>{
@@ -971,7 +995,7 @@ function renderMonthGroups(byDay){
     </div>`;
   }).join('');
 }
-
+ 
 function renderWeekGroupsInner(byDay){
   const weekMap={};
   Object.keys(byDay).forEach(ds=>{
@@ -1001,10 +1025,10 @@ function renderWeekGroupsInner(byDay){
     </div>`;
   }).join('');
 }
-
+ 
 // ─── REPORTS ─────────────────────────────────────────────────────────────────
 let openRepGroups = new Set();
-
+ 
 window.setRepPeriod = function(p){
   repPeriod=p; openRepGroups.clear();
   document.querySelectorAll('#page-reports .period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));
@@ -1014,7 +1038,7 @@ window.toggleRepGroup = function(key){
   if(openRepGroups.has(key)) openRepGroups.delete(key); else openRepGroups.add(key);
   renderReports();
 };
-
+ 
 function catBarsHTML(ops){
   const byCat={};
   ops.filter(o=>o.type==='expense').forEach(o=>{ byCat[o.category]=(byCat[o.category]||0)+o.amount; });
@@ -1030,7 +1054,7 @@ function catBarsHTML(ops){
     </div>`;
   }).join('');
 }
-
+ 
 function renderReports(){
   // Показываем ВСЕ данные — группировка по неделям или месяцам
   const filtered = operations.slice();
@@ -1098,7 +1122,7 @@ function renderReports(){
   }
   document.getElementById('reports-container').innerHTML=html;
 }
-
+ 
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
 function renderSettings(){
   document.getElementById('setting-budget').textContent = fmtVND(weeklyBudget) + ' ₫';
@@ -1115,12 +1139,12 @@ function renderSettings(){
       </button>
     </div>`).join('');
 }
-
+ 
 // ─── MODAL: ADD/EDIT OP ──────────────────────────────────────────────────────
 let editingOpId  = null;
 let selectedType = 'expense';
 let selectedCat  = null;
-
+ 
 window.openAddOpModal = function(opId=null, prefillCat=null){
   editingOpId = opId; selectedType = 'expense'; selectedCat = prefillCat;
   if(opId){
@@ -1147,7 +1171,7 @@ window.openAddOpModal = function(opId=null, prefillCat=null){
   openModal('overlay-op');
 };
 window.openEditOpModal = window.openAddOpModal;
-
+ 
 window.selectType = function(t){ selectedType=t; updateTypeButtons(); updateCatsPicker(); };
 function updateTypeButtons(){
   document.getElementById('type-expense').className='type-btn expense'+(selectedType==='expense'?' active':'');
@@ -1191,7 +1215,7 @@ window.deleteCurrentOp = function(){
   save('ops', operations);
   closeModal('overlay-op'); renderAll();
 };
-
+ 
 // ─── MODAL: BUDGET ───────────────────────────────────────────────────────────
 window.openBudgetModal = function(){
   document.getElementById('budget-input').value = weeklyBudget ? fmtVND(weeklyBudget) : '';
@@ -1202,7 +1226,7 @@ window.saveBudget = function(){
   save('budget', weeklyBudget);
   closeModal('overlay-budget'); renderSettings(); renderHome();
 };
-
+ 
 // ─── MODAL: WEEKDAY ──────────────────────────────────────────────────────────
 let selectedWeekday = weekStartDay;
 window.openWeekdayModal = function(){
@@ -1220,13 +1244,13 @@ window.saveWeekday = function(){
   save('weekStart', weekStartDay);
   closeModal('overlay-weekday'); renderSettings(); renderHome();
 };
-
+ 
 // ─── MODAL: ADD CAT ──────────────────────────────────────────────────────────
 let selectedColor = COLORS[0];
 let selectedIcon  = ICONS[0];
 let selectedCatType = 'expense';
 let iconEditMode = false;
-
+ 
 window.selectCatType = function(t){
   selectedCatType=t;
   document.getElementById('cat-type-expense').className='cat-type-btn expense'+(t==='expense'?' active':'');
@@ -1299,7 +1323,7 @@ window.saveCategory = function(){
   save('cats', categories);
   closeModal('overlay-cat'); renderSettings(); renderHome();
 };
-
+ 
 // ─── CONFIRM DELETE CAT ──────────────────────────────────────────────────────
 window.confirmDeleteCat = function(catId){
   const cat=categories.find(c=>c.id===catId);
@@ -1314,22 +1338,22 @@ window.confirmDeleteCat = function(catId){
   };
   openModal('overlay-confirm');
 };
-
+ 
 // ─── OVERLAY HELPERS ─────────────────────────────────────────────────────────
 window.openModal  = function(id){ document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); };
 window.closeModal = function(id){ document.getElementById(id).classList.remove('open'); document.body.classList.remove('modal-open'); };
 function openModal(id){ document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.classList.remove('modal-open'); }
 window.closeOverlay = function(id,e){ if(e.target.id===id) closeModal(id); };
-
+ 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 // Привязываем кнопку входа и Enter внутри модуля
 document.getElementById('login-btn').addEventListener('click', doLogin);
 document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-
+ 
 // Приложение скрыто до входа — показывается через onAuthStateChanged
 document.getElementById('app').style.display = 'none';
-
+ 
 // Авто-обновление в 00:00 по Вьетнаму
 function scheduleMidnightRefresh(){
   const now = getVNNow();
